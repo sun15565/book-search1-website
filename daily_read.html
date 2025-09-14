@@ -1,0 +1,592 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>每日一读 - 书海阁</title>
+    <link rel="stylesheet" href="styles.css">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <style>
+        .daily-read-page {
+            background: #f8f9fa;
+            min-height: 100vh;
+        }
+        
+        .daily-read-header {
+            background: linear-gradient(135deg, #28a745, #20c997);
+            color: white;
+            padding: 60px 0 40px;
+            text-align: center;
+        }
+        
+        .daily-read-header h1 {
+            font-size: 36px;
+            margin-bottom: 10px;
+            font-weight: bold;
+        }
+        
+        .daily-read-header p {
+            font-size: 16px;
+            opacity: 0.9;
+        }
+        
+        .daily-read-nav {
+            background: white;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            margin-bottom: 30px;
+        }
+        
+        .daily-read-nav-list {
+            display: flex;
+            justify-content: center;
+            list-style: none;
+            margin: 0;
+            padding: 0;
+        }
+        
+        .daily-read-nav-item {
+            margin: 0 20px;
+        }
+        
+        .daily-read-nav-link {
+            display: block;
+            padding: 15px 25px;
+            color: #666;
+            text-decoration: none;
+            font-weight: 500;
+            border-bottom: 3px solid transparent;
+            transition: all 0.3s;
+        }
+        
+        .daily-read-nav-link:hover,
+        .daily-read-nav-link.active {
+            color: #28a745;
+            border-bottom-color: #28a745;
+        }
+        
+        .featured-book {
+            background: white;
+            border-radius: 15px;
+            overflow: hidden;
+            box-shadow: 0 8px 25px rgba(0,0,0,0.1);
+            margin-bottom: 40px;
+        }
+        
+        .featured-book-content {
+            display: grid;
+            grid-template-columns: 300px 1fr;
+            gap: 0;
+        }
+        
+        .featured-book-cover {
+            height: 400px;
+            overflow: hidden;
+            position: relative;
+        }
+        
+        .featured-book-cover img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+        
+        .featured-book-info {
+            padding: 40px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+        }
+        
+        .featured-book-title {
+            font-size: 28px;
+            font-weight: bold;
+            color: #333;
+            margin-bottom: 15px;
+            line-height: 1.3;
+        }
+        
+        .featured-book-author {
+            color: #666;
+            font-size: 18px;
+            margin-bottom: 20px;
+        }
+        
+        .featured-book-description {
+            color: #777;
+            font-size: 16px;
+            line-height: 1.6;
+            margin-bottom: 25px;
+        }
+        
+        .featured-book-stats {
+            display: flex;
+            gap: 30px;
+            margin-bottom: 25px;
+        }
+        
+        .stat-item {
+            text-align: center;
+        }
+        
+        .stat-number {
+            font-size: 24px;
+            font-weight: bold;
+            color: #28a745;
+        }
+        
+        .stat-label {
+            font-size: 14px;
+            color: #666;
+        }
+        
+        .read-button {
+            background: linear-gradient(135deg, #28a745, #20c997);
+            color: white;
+            border: none;
+            padding: 15px 30px;
+            border-radius: 25px;
+            font-size: 16px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.3s;
+            text-decoration: none;
+            display: inline-block;
+            text-align: center;
+        }
+        
+        .read-button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(40,167,69,0.3);
+            color: white;
+        }
+        
+        .books-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+            gap: 30px;
+            padding: 30px 0;
+        }
+        
+        .book-card {
+            background: white;
+            border-radius: 12px;
+            overflow: hidden;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+            transition: transform 0.3s, box-shadow 0.3s;
+            cursor: pointer;
+        }
+        
+        .book-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 8px 25px rgba(0,0,0,0.15);
+        }
+        
+        .book-cover {
+            width: 100%;
+            height: 280px;
+            overflow: hidden;
+            position: relative;
+        }
+        
+        .book-cover img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            transition: transform 0.3s;
+        }
+        
+        .book-card:hover .book-cover img {
+            transform: scale(1.05);
+        }
+        
+        .book-tag {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            background: rgba(40,167,69,0.9);
+            color: white;
+            padding: 5px 10px;
+            border-radius: 15px;
+            font-size: 12px;
+            font-weight: bold;
+        }
+        
+        .book-info {
+            padding: 20px;
+        }
+        
+        .book-title {
+            font-size: 16px;
+            font-weight: bold;
+            color: #333;
+            margin-bottom: 8px;
+            line-height: 1.4;
+            display: -webkit-box;
+            -webkit-line-clamp: 2;
+            -webkit-box-orient: vertical;
+            line-clamp: 2;
+            overflow: hidden;
+        }
+        
+        .book-author {
+            color: #666;
+            font-size: 14px;
+            margin-bottom: 10px;
+        }
+        
+        .book-description {
+            color: #999;
+            font-size: 13px;
+            line-height: 1.5;
+            display: -webkit-box;
+            -webkit-line-clamp: 3;
+            -webkit-box-orient: vertical;
+            line-clamp: 3;
+            overflow: hidden;
+        }
+        
+        .section-title {
+            font-size: 24px;
+            color: #333;
+            margin: 40px 0 20px;
+            text-align: center;
+            position: relative;
+        }
+        
+        .section-title::after {
+            content: '';
+            position: absolute;
+            bottom: -10px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 60px;
+            height: 3px;
+            background: #28a745;
+        }
+        
+        .back-to-home {
+            position: fixed;
+            top: 20px;
+            left: 20px;
+            background: rgba(0,0,0,0.7);
+            color: white;
+            padding: 10px 15px;
+            border-radius: 25px;
+            text-decoration: none;
+            font-size: 14px;
+            transition: all 0.3s;
+            z-index: 1000;
+        }
+        
+        .back-to-home:hover {
+            background: rgba(0,0,0,0.9);
+            color: white;
+        }
+        
+        @media (max-width: 768px) {
+            .featured-book-content {
+                grid-template-columns: 1fr;
+            }
+            
+            .featured-book-cover {
+                height: 250px;
+            }
+            
+            .featured-book-info {
+                padding: 20px;
+            }
+            
+            .featured-book-title {
+                font-size: 24px;
+            }
+            
+            .books-grid {
+                grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+                gap: 20px;
+            }
+            
+            .book-cover {
+                height: 200px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <a href="index.html" class="back-to-home">
+        <i class="fas fa-arrow-left"></i> 返回首页
+    </a>
+    
+    <div class="daily-read-page">
+        <div class="daily-read-header">
+            <div class="container">
+                <h1>每日一读</h1>
+                <p>精选优质图书，每日推荐一本好书</p>
+                <div style="margin-top: 20px;">
+                    <a href="index.html" style="color: white; margin: 0 15px; text-decoration: none;">首页</a>
+                    <a href="ranking.html" style="color: white; margin: 0 15px; text-decoration: none;">排行榜</a>
+                    <a href="reading_history.html" style="color: white; margin: 0 15px; text-decoration: none;">阅读记录</a>
+                </div>
+            </div>
+        </div>
+        
+        <div class="daily-read-nav">
+            <div class="container">
+                <ul class="daily-read-nav-list">
+                    <li class="daily-read-nav-item">
+                        <a href="#" class="daily-read-nav-link active" data-category="today">今日推荐</a>
+                    </li>
+                    <li class="daily-read-nav-item">
+                        <a href="#" class="daily-read-nav-link" data-category="week">本周精选</a>
+                    </li>
+                    <li class="daily-read-nav-item">
+                        <a href="#" class="daily-read-nav-link" data-category="month">本月热门</a>
+                    </li>
+                    <li class="daily-read-nav-item">
+                        <a href="#" class="daily-read-nav-link" data-category="classic">经典必读</a>
+                    </li>
+                </ul>
+            </div>
+        </div>
+        
+        <div class="container">
+            <!-- 今日推荐图书 -->
+            <div class="featured-book" id="featuredBook">
+                <!-- 动态生成内容 -->
+            </div>
+            
+            <h2 class="section-title">推荐阅读</h2>
+            <div class="books-grid" id="booksGrid">
+                <!-- 动态生成内容 -->
+            </div>
+        </div>
+    </div>
+    
+    <script src="book_data.js"></script>
+    <script>
+        // 使用共享的图书数据
+        const dailyReadBooks = [
+            {
+                id: 1,
+                title: "Building Web APIs with ASP.NET Core",
+                author: "作者A",
+                category: "today",
+                cover: "images/5204s.jpeg",
+                description: "...",
+                views: "12.5万",
+                rating: 4.8,
+                chapters: 156,
+                isFeatured: true
+            },
+            {
+                id: 2,
+                title: "AI for Everyday IT",
+                author: "作者B",
+                category: "week",
+                cover: "images/5205s.jpeg",
+                description: "...",
+                views: "10.8万",
+                rating: 4.7,
+                chapters: 89,
+                isFeatured: false
+            },
+            {
+                id: 3,
+                title: "Redis设计与实现",
+                author: "作者C",
+                category: "month",
+                cover: "images/5206s.jpeg",
+                description: "...",
+                views: "9.2万",
+                rating: 4.6,
+                chapters: 203,
+                isFeatured: false
+            },
+            {
+                id: 4,
+                title: "Redis入门指南（第2版）",
+                author: "作者D",
+                category: "classic",
+                cover: "images/5207s.jpeg",
+                description: "...",
+                views: "8.7万",
+                rating: 4.5,
+                chapters: 30,
+                isFeatured: false
+            },
+            {
+                id: 5,
+                title: "Redis开发与运维",
+                author: "作者E",
+                category: "classic",
+                cover: "images/5208s.jpeg",
+                description: "...",
+                views: "7.9万",
+                rating: 4.4,
+                chapters: 178,
+                isFeatured: false
+            },
+            {
+                id: 6,
+                title: "React快速上手开发",
+                author: "作者F",
+                category: "week",
+                cover: "images/5209s.jpeg",
+                description: "...",
+                views: "7.2万",
+                rating: 4.3,
+                chapters: 95,
+                isFeatured: false
+            },
+            {
+                id: 7,
+                title: "RabbitMQ实战指南",
+                author: "作者G",
+                category: "month",
+                cover: "images/5210s.jpeg",
+                description: "...",
+                views: "6.8万",
+                rating: 4.2,
+                chapters: 142,
+                isFeatured: false
+            },
+            {
+                id: 8,
+                title: "Python自动化运维：技术与最佳实践",
+                author: "作者H",
+                category: "today",
+                cover: "images/5211s.jpeg",
+                description: "...",
+                views: "6.3万",
+                rating: 4.1,
+                chapters: 167,
+                isFeatured: false
+            }
+        ];
+        
+        let currentCategory = 'today';
+        
+        // 初始化页面
+        document.addEventListener('DOMContentLoaded', function() {
+            loadFeaturedBook();
+            loadBooks();
+            setupCategoryFilter();
+        });
+        
+        // 加载推荐图书
+        function loadFeaturedBook() {
+            const featuredBook = dailyReadBooks.find(book => book.isFeatured);
+            const featuredBookDiv = document.getElementById('featuredBook');
+            
+            if (featuredBook) {
+                featuredBookDiv.innerHTML = `
+                    <div class="featured-book-content">
+                        <div class="featured-book-cover">
+                            <img src="${featuredBook.cover}" alt="${featuredBook.title}" onerror="this.src='https://via.placeholder.com/300x400/cccccc/666666?text=暂无封面'">
+                        </div>
+                        <div class="featured-book-info">
+                            <h2 class="featured-book-title">${featuredBook.title}</h2>
+                            <p class="featured-book-author">作者：${featuredBook.author}</p>
+                            <p class="featured-book-description">${featuredBook.description}</p>
+                            <div class="featured-book-stats">
+                                <div class="stat-item">
+                                    <div class="stat-number">${featuredBook.rating}</div>
+                                    <div class="stat-label">评分</div>
+                                </div>
+                                <div class="stat-item">
+                                    <div class="stat-number">${featuredBook.views}</div>
+                                    <div class="stat-label">阅读量</div>
+                                </div>
+                                <div class="stat-item">
+                                    <div class="stat-number">${featuredBook.chapters}</div>
+                                    <div class="stat-label">章节数</div>
+                                </div>
+                            </div>
+                            <a href="#" class="read-button" onclick="startReading(${featuredBook.id})">
+                                <i class="fas fa-book-open"></i> 开始阅读
+                            </a>
+                        </div>
+                    </div>
+                `;
+            }
+        }
+        
+        // 加载图书列表
+        function loadBooks() {
+            const booksGrid = document.getElementById('booksGrid');
+            const filteredBooks = dailyReadBooks.filter(book => 
+                book.category === currentCategory && !book.isFeatured
+            );
+            
+            const html = filteredBooks.map(book => `
+                <div class="book-card" onclick="goToBookDetail(${book.id})">
+                    <div class="book-cover">
+                        <img src="${book.cover}" alt="${book.title}" onerror="this.src='https://via.placeholder.com/200x280/cccccc/666666?text=暂无封面'">
+                        <div class="book-tag">${getCategoryTag(book.category)}</div>
+                    </div>
+                    <div class="book-info">
+                        <h3 class="book-title">${book.title}</h3>
+                        <p class="book-author">${book.author}</p>
+                        <p class="book-description">${book.description}</p>
+                    </div>
+                </div>
+            `).join('');
+            
+            booksGrid.innerHTML = html;
+        }
+        
+        // 获取分类标签
+        function getCategoryTag(category) {
+            const tags = {
+                'today': '今日推荐',
+                'week': '本周精选',
+                'month': '本月热门',
+                'classic': '经典必读'
+            };
+            return tags[category] || '推荐';
+        }
+        
+        // 设置分类筛选
+        function setupCategoryFilter() {
+            const navLinks = document.querySelectorAll('.daily-read-nav-link');
+            
+            navLinks.forEach(link => {
+                link.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    
+                    // 移除所有活动状态
+                    navLinks.forEach(l => l.classList.remove('active'));
+                    // 添加当前活动状态
+                    this.classList.add('active');
+                    
+                    // 更新当前分类
+                    currentCategory = this.dataset.category;
+                    
+                    // 重新加载图书
+                    loadBooks();
+                });
+            });
+        }
+        
+        // 跳转到图书详情页面
+        function goToBookDetail(bookId) {
+            window.location.href = `book_detail.html?id=${bookId}`;
+        }
+        
+        // 显示图书详情（保留原有功能）
+        function showBookDetail(bookId) {
+            const book = dailyReadBooks.find(b => b.id === bookId);
+            if (book) {
+                alert(`图书详情：\n\n书名：${book.title}\n作者：${book.author}\n分类：${getCategoryTag(book.category)}\n评分：${book.rating}分\n阅读量：${book.views}\n章节数：${book.chapters}\n\n描述：${book.description}\n\n在实际应用中，这里会跳转到图书详情页。`);
+            }
+        }
+        
+        // 开始阅读
+        function startReading(bookId) {
+            const book = dailyReadBooks.find(b => b.id === bookId);
+            if (book) {
+                alert(`开始阅读《${book.title}》\n\n作者：${book.author}\n\n这是一个示例阅读页面。在实际应用中，这里会跳转到阅读界面。`);
+            }
+        }
+    </script>
+</body>
+</html>

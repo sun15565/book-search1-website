@@ -1,0 +1,794 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>阅读记录 - 书海阁</title>
+    <link rel="stylesheet" href="styles.css">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <style>
+        .reading-history-page {
+            background: #f8f9fa;
+            min-height: 100vh;
+        }
+        
+        .history-header {
+            background: linear-gradient(135deg, #007bff, #0056b3);
+            color: white;
+            padding: 40px 0;
+        }
+        
+        .history-content {
+            background: white;
+            border-radius: 15px;
+            margin: -50px auto 40px;
+            padding: 40px;
+            box-shadow: 0 8px 25px rgba(0,0,0,0.1);
+            max-width: 1200px;
+            position: relative;
+        }
+        
+        .history-stats {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 20px;
+            margin-bottom: 40px;
+        }
+        
+        .stat-card {
+            background: linear-gradient(135deg, #f8f9fa, #e9ecef);
+            padding: 25px;
+            border-radius: 12px;
+            text-align: center;
+            border: 1px solid #e9ecef;
+        }
+        
+        .stat-number {
+            font-size: 32px;
+            font-weight: bold;
+            color: #007bff;
+            margin-bottom: 8px;
+        }
+        
+        .stat-label {
+            color: #666;
+            font-size: 14px;
+        }
+        
+        .history-tabs {
+            border-bottom: 2px solid #e9ecef;
+            margin-bottom: 30px;
+        }
+        
+        .tab-list {
+            display: flex;
+            list-style: none;
+            margin: 0;
+            padding: 0;
+        }
+        
+        .tab-item {
+            margin-right: 30px;
+        }
+        
+        .tab-link {
+            display: block;
+            padding: 15px 0;
+            color: #666;
+            text-decoration: none;
+            font-weight: 500;
+            border-bottom: 3px solid transparent;
+            transition: all 0.3s;
+        }
+        
+        .tab-link:hover,
+        .tab-link.active {
+            color: #007bff;
+            border-bottom-color: #007bff;
+        }
+        
+        .tab-content {
+            display: none;
+        }
+        
+        .tab-content.active {
+            display: block;
+        }
+        
+        .history-list {
+            max-height: 600px;
+            overflow-y: auto;
+        }
+        
+        .history-item {
+            display: flex;
+            align-items: center;
+            padding: 20px;
+            border-bottom: 1px solid #f0f0f0;
+            transition: background-color 0.3s;
+            cursor: pointer;
+        }
+        
+        .history-item:hover {
+            background-color: #f8f9fa;
+        }
+        
+        .history-item:last-child {
+            border-bottom: none;
+        }
+        
+        .book-cover-small {
+            width: 80px;
+            height: 110px;
+            border-radius: 8px;
+            overflow: hidden;
+            margin-right: 20px;
+            flex-shrink: 0;
+        }
+        
+        .book-cover-small img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+        
+        .book-info {
+            flex: 1;
+            min-width: 0;
+        }
+        
+        .book-title {
+            font-size: 18px;
+            font-weight: bold;
+            color: #333;
+            margin-bottom: 5px;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+        
+        .book-author {
+            color: #666;
+            font-size: 14px;
+            margin-bottom: 8px;
+        }
+        
+        .reading-progress {
+            margin-bottom: 8px;
+        }
+        
+        .progress-bar {
+            width: 100%;
+            height: 6px;
+            background-color: #e9ecef;
+            border-radius: 3px;
+            overflow: hidden;
+        }
+        
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #007bff, #0056b3);
+            transition: width 0.3s;
+        }
+        
+        .progress-text {
+            font-size: 12px;
+            color: #666;
+            margin-top: 4px;
+        }
+        
+        .reading-time {
+            font-size: 12px;
+            color: #999;
+        }
+        
+        .history-actions {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            margin-left: 20px;
+        }
+        
+        .action-btn {
+            padding: 8px 16px;
+            border: none;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.3s;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            gap: 5px;
+            white-space: nowrap;
+        }
+        
+        .btn-primary {
+            background: linear-gradient(135deg, #007bff, #0056b3);
+            color: white;
+        }
+        
+        .btn-primary:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 3px 10px rgba(0,123,255,0.3);
+            color: white;
+        }
+        
+        .btn-danger {
+            background: #dc3545;
+            color: white;
+        }
+        
+        .btn-danger:hover {
+            background: #c82333;
+            color: white;
+        }
+        
+        .empty-state {
+            text-align: center;
+            padding: 60px 20px;
+            color: #666;
+        }
+        
+        .empty-state i {
+            font-size: 64px;
+            color: #ddd;
+            margin-bottom: 20px;
+        }
+        
+        .empty-state h3 {
+            color: #999;
+            margin-bottom: 10px;
+        }
+        
+        .empty-state p {
+            color: #ccc;
+            margin-bottom: 20px;
+        }
+        
+        .back-to-home {
+            position: fixed;
+            top: 20px;
+            left: 20px;
+            background: rgba(0,0,0,0.7);
+            color: white;
+            padding: 10px 15px;
+            border-radius: 25px;
+            text-decoration: none;
+            font-size: 14px;
+            transition: all 0.3s;
+            z-index: 1000;
+        }
+        
+        .back-to-home:hover {
+            background: rgba(0,0,0,0.9);
+            color: white;
+        }
+        
+        .filter-controls {
+            display: flex;
+            gap: 15px;
+            margin-bottom: 20px;
+            align-items: center;
+        }
+        
+        .filter-select {
+            padding: 8px 12px;
+            border: 1px solid #ddd;
+            border-radius: 6px;
+            background: white;
+            font-size: 14px;
+        }
+        
+        .search-box {
+            flex: 1;
+            max-width: 300px;
+            padding: 8px 12px;
+            border: 1px solid #ddd;
+            border-radius: 6px;
+            font-size: 14px;
+        }
+        
+        .clear-history-btn {
+            background: #dc3545;
+            color: white;
+            border: none;
+            padding: 8px 16px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 14px;
+            transition: background 0.3s;
+        }
+        
+        .clear-history-btn:hover {
+            background: #c82333;
+        }
+        
+        @media (max-width: 768px) {
+            .history-item {
+                flex-direction: column;
+                align-items: flex-start;
+            }
+            
+            .book-cover-small {
+                margin-bottom: 15px;
+                margin-right: 0;
+            }
+            
+            .history-actions {
+                margin-left: 0;
+                margin-top: 15px;
+                flex-direction: row;
+                width: 100%;
+            }
+            
+            .action-btn {
+                flex: 1;
+                justify-content: center;
+            }
+            
+            .filter-controls {
+                flex-direction: column;
+                align-items: stretch;
+            }
+            
+            .search-box {
+                max-width: none;
+            }
+        }
+    </style>
+</head>
+<body>
+    <a href="index.html" class="back-to-home">
+        <i class="fas fa-arrow-left"></i> 返回首页
+    </a>
+    
+    <div class="reading-history-page">
+        <div class="history-header">
+            <div class="container">
+                <h1><i class="fas fa-history"></i> 阅读记录</h1>
+                <p>管理您的阅读历史和进度</p>
+            </div>
+        </div>
+        
+        <div class="container">
+            <div class="history-content">
+                <div class="history-stats" id="historyStats">
+                    <!-- 动态生成统计信息 -->
+                </div>
+                
+                <div class="history-tabs">
+                    <ul class="tab-list">
+                        <li class="tab-item">
+                            <a href="#all" class="tab-link active" data-tab="all">全部记录</a>
+                        </li>
+                        <li class="tab-item">
+                            <a href="#reading" class="tab-link" data-tab="reading">正在阅读</a>
+                        </li>
+                        <li class="tab-item">
+                            <a href="#completed" class="tab-link" data-tab="completed">已完成</a>
+                        </li>
+                        <li class="tab-item">
+                            <a href="#favorites" class="tab-link" data-tab="favorites">收藏夹</a>
+                        </li>
+                    </ul>
+                </div>
+                
+                <div class="filter-controls">
+                    <select class="filter-select" id="sortSelect">
+                        <option value="recent">最近阅读</option>
+                        <option value="progress">阅读进度</option>
+                        <option value="title">书名排序</option>
+                        <option value="author">作者排序</option>
+                    </select>
+                    <input type="text" class="search-box" id="searchInput" placeholder="搜索图书...">
+                    <button class="clear-history-btn" id="clearHistoryBtn">清空记录</button>
+                </div>
+                
+                <div id="all" class="tab-content active">
+                    <div class="history-list" id="allHistoryList">
+                        <!-- 动态生成全部记录 -->
+                    </div>
+                </div>
+                
+                <div id="reading" class="tab-content">
+                    <div class="history-list" id="readingHistoryList">
+                        <!-- 动态生成正在阅读记录 -->
+                    </div>
+                </div>
+                
+                <div id="completed" class="tab-content">
+                    <div class="history-list" id="completedHistoryList">
+                        <!-- 动态生成已完成记录 -->
+                    </div>
+                </div>
+                
+                <div id="favorites" class="tab-content">
+                    <div class="history-list" id="favoritesHistoryList">
+                        <!-- 动态生成收藏记录 -->
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <script src="book_data.js"></script>
+    <script>
+        // 阅读记录管理类
+        class ReadingHistoryManager {
+            constructor() {
+                this.storageKey = 'readingHistory';
+                this.favoritesKey = 'favoriteBooks';
+                this.history = this.loadHistory();
+                this.favorites = this.loadFavorites();
+                this.currentTab = 'all';
+                this.currentSort = 'recent';
+                this.searchQuery = '';
+            }
+            
+            // 加载阅读记录
+            loadHistory() {
+                const stored = localStorage.getItem(this.storageKey);
+                return stored ? JSON.parse(stored) : [];
+            }
+            
+            // 保存阅读记录
+            saveHistory() {
+                localStorage.setItem(this.storageKey, JSON.stringify(this.history));
+            }
+            
+            // 加载收藏夹
+            loadFavorites() {
+                const stored = localStorage.getItem(this.favoritesKey);
+                return stored ? JSON.parse(stored) : [];
+            }
+            
+            // 保存收藏夹
+            saveFavorites() {
+                localStorage.setItem(this.favoritesKey, JSON.stringify(this.favorites));
+            }
+            
+            // 添加阅读记录
+            addReadingRecord(bookId, progress = 0, lastReadTime = null) {
+                const book = this.findBookById(bookId);
+                if (!book) return false;
+                
+                const existingRecord = this.history.find(record => record.bookId === bookId);
+                const now = new Date().toISOString();
+                
+                if (existingRecord) {
+                    // 更新现有记录
+                    existingRecord.progress = Math.max(existingRecord.progress, progress);
+                    existingRecord.lastReadTime = lastReadTime || now;
+                    existingRecord.readCount = (existingRecord.readCount || 0) + 1;
+                } else {
+                    // 创建新记录
+                    this.history.unshift({
+                        bookId: bookId,
+                        title: book.title,
+                        author: book.author,
+                        cover: book.cover,
+                        progress: progress,
+                        lastReadTime: lastReadTime || now,
+                        readCount: 1,
+                        totalChapters: book.chapters || 156,
+                        isCompleted: progress >= 100
+                    });
+                }
+                
+                this.saveHistory();
+                return true;
+            }
+            
+            // 更新阅读进度
+            updateProgress(bookId, progress) {
+                const record = this.history.find(record => record.bookId === bookId);
+                if (record) {
+                    record.progress = Math.min(100, Math.max(0, progress));
+                    record.lastReadTime = new Date().toISOString();
+                    record.isCompleted = record.progress >= 100;
+                    this.saveHistory();
+                    return true;
+                }
+                return false;
+            }
+            
+            // 删除阅读记录
+            removeRecord(bookId) {
+                this.history = this.history.filter(record => record.bookId !== bookId);
+                this.saveHistory();
+            }
+            
+            // 添加到收藏夹
+            addToFavorites(bookId) {
+                if (!this.favorites.includes(bookId)) {
+                    this.favorites.push(bookId);
+                    this.saveFavorites();
+                    return true;
+                }
+                return false;
+            }
+            
+            // 从收藏夹移除
+            removeFromFavorites(bookId) {
+                this.favorites = this.favorites.filter(id => id !== bookId);
+                this.saveFavorites();
+            }
+            
+            // 查找图书
+            findBookById(bookId) {
+                const allBooks = [
+                    ...bookData.recommendedNewBooks,
+                    ...bookData.romanceBooks,
+                    ...bookData.originalBooks
+                ];
+                return allBooks.find(book => book.id == bookId);
+            }
+            
+            // 获取统计信息
+            getStats() {
+                const totalBooks = this.history.length;
+                const completedBooks = this.history.filter(record => record.isCompleted).length;
+                const readingBooks = this.history.filter(record => !record.isCompleted && record.progress > 0).length;
+                const totalReadTime = this.history.reduce((sum, record) => sum + (record.readCount || 0), 0);
+                
+                return {
+                    totalBooks,
+                    completedBooks,
+                    readingBooks,
+                    totalReadTime
+                };
+            }
+            
+            // 获取过滤后的记录
+            getFilteredRecords(tab = 'all', sort = 'recent', search = '') {
+                let records = [...this.history];
+                
+                // 按标签页过滤
+                switch (tab) {
+                    case 'reading':
+                        records = records.filter(record => !record.isCompleted && record.progress > 0);
+                        break;
+                    case 'completed':
+                        records = records.filter(record => record.isCompleted);
+                        break;
+                    case 'favorites':
+                        records = records.filter(record => this.favorites.includes(record.bookId));
+                        break;
+                }
+                
+                // 搜索过滤
+                if (search) {
+                    const query = search.toLowerCase();
+                    records = records.filter(record => 
+                        record.title.toLowerCase().includes(query) ||
+                        record.author.toLowerCase().includes(query)
+                    );
+                }
+                
+                // 排序
+                switch (sort) {
+                    case 'recent':
+                        records.sort((a, b) => new Date(b.lastReadTime) - new Date(a.lastReadTime));
+                        break;
+                    case 'progress':
+                        records.sort((a, b) => b.progress - a.progress);
+                        break;
+                    case 'title':
+                        records.sort((a, b) => a.title.localeCompare(b.title));
+                        break;
+                    case 'author':
+                        records.sort((a, b) => a.author.localeCompare(b.author));
+                        break;
+                }
+                
+                return records;
+            }
+        }
+        
+        // 初始化阅读记录管理器
+        const historyManager = new ReadingHistoryManager();
+        
+        // 生成统计信息
+        function generateStats() {
+            const stats = historyManager.getStats();
+            const statsHtml = `
+                <div class="stat-card">
+                    <div class="stat-number">${stats.totalBooks}</div>
+                    <div class="stat-label">总图书数</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-number">${stats.completedBooks}</div>
+                    <div class="stat-label">已完成</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-number">${stats.readingBooks}</div>
+                    <div class="stat-label">正在阅读</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-number">${stats.totalReadTime}</div>
+                    <div class="stat-label">阅读次数</div>
+                </div>
+            `;
+            document.getElementById('historyStats').innerHTML = statsHtml;
+        }
+        
+        // 生成记录列表
+        function generateHistoryList(records, containerId) {
+            const container = document.getElementById(containerId);
+            
+            if (records.length === 0) {
+                const emptyState = `
+                    <div class="empty-state">
+                        <i class="fas fa-book-open"></i>
+                        <h3>暂无记录</h3>
+                        <p>开始阅读图书来创建您的阅读记录</p>
+                        <a href="index.html" class="action-btn btn-primary">去阅读</a>
+                    </div>
+                `;
+                container.innerHTML = emptyState;
+                return;
+            }
+            
+            const html = records.map(record => `
+                <div class="history-item" onclick="goToBookDetail(${record.bookId})">
+                    <div class="book-cover-small">
+                        <img src="${record.cover}" alt="${record.title}" onerror="this.src='https://via.placeholder.com/80x110/cccccc/666666?text=暂无封面'">
+                    </div>
+                    <div class="book-info">
+                        <div class="book-title">${record.title}</div>
+                        <div class="book-author">${record.author}</div>
+                        <div class="reading-progress">
+                            <div class="progress-bar">
+                                <div class="progress-fill" style="width: ${record.progress}%"></div>
+                            </div>
+                            <div class="progress-text">${record.progress}% 完成 (${Math.floor(record.progress * record.totalChapters / 100)}/${record.totalChapters} 章)</div>
+                        </div>
+                        <div class="reading-time">最后阅读：${formatDate(record.lastReadTime)} | 阅读次数：${record.readCount}</div>
+                    </div>
+                    <div class="history-actions">
+                        <button class="action-btn btn-primary" onclick="event.stopPropagation(); continueReading(${record.bookId})">
+                            <i class="fas fa-play"></i> 继续阅读
+                        </button>
+                        <button class="action-btn ${historyManager.favorites.includes(record.bookId) ? 'btn-danger' : 'btn-primary'}" 
+                                onclick="event.stopPropagation(); toggleFavorite(${record.bookId})">
+                            <i class="fas fa-heart"></i> ${historyManager.favorites.includes(record.bookId) ? '取消收藏' : '收藏'}
+                        </button>
+                        <button class="action-btn btn-danger" onclick="event.stopPropagation(); removeRecord(${record.bookId})">
+                            <i class="fas fa-trash"></i> 删除
+                        </button>
+                    </div>
+                </div>
+            `).join('');
+            
+            container.innerHTML = html;
+        }
+        
+        // 更新所有标签页内容
+        function updateAllTabs() {
+            const allRecords = historyManager.getFilteredRecords('all', historyManager.currentSort, historyManager.searchQuery);
+            const readingRecords = historyManager.getFilteredRecords('reading', historyManager.currentSort, historyManager.searchQuery);
+            const completedRecords = historyManager.getFilteredRecords('completed', historyManager.currentSort, historyManager.searchQuery);
+            const favoriteRecords = historyManager.getFilteredRecords('favorites', historyManager.currentSort, historyManager.searchQuery);
+            
+            generateHistoryList(allRecords, 'allHistoryList');
+            generateHistoryList(readingRecords, 'readingHistoryList');
+            generateHistoryList(completedRecords, 'completedHistoryList');
+            generateHistoryList(favoriteRecords, 'favoritesHistoryList');
+        }
+        
+        // 格式化日期
+        function formatDate(dateString) {
+            const date = new Date(dateString);
+            const now = new Date();
+            const diffTime = now - date;
+            const diffDays = Math.floor(diffTime / (1000 * 60 * 60 * 24));
+            
+            if (diffDays === 0) {
+                return '今天';
+            } else if (diffDays === 1) {
+                return '昨天';
+            } else if (diffDays < 7) {
+                return `${diffDays}天前`;
+            } else {
+                return date.toLocaleDateString('zh-CN');
+            }
+        }
+        
+        // 跳转到图书详情
+        function goToBookDetail(bookId) {
+            window.location.href = `book_detail.html?id=${bookId}`;
+        }
+        
+        // 继续阅读
+        function continueReading(bookId) {
+            // 更新阅读记录
+            historyManager.addReadingRecord(bookId);
+            // 跳转到阅读页面（这里可以跳转到具体的阅读界面）
+            alert(`继续阅读图书 ID: ${bookId}\n\n在实际应用中，这里会跳转到阅读界面。`);
+        }
+        
+        // 切换收藏状态
+        function toggleFavorite(bookId) {
+            if (historyManager.favorites.includes(bookId)) {
+                historyManager.removeFromFavorites(bookId);
+            } else {
+                historyManager.addToFavorites(bookId);
+            }
+            updateAllTabs();
+        }
+        
+        // 删除记录
+        function removeRecord(bookId) {
+            if (confirm('确定要删除这条阅读记录吗？')) {
+                historyManager.removeRecord(bookId);
+                generateStats();
+                updateAllTabs();
+            }
+        }
+        
+        // 清空所有记录
+        function clearAllHistory() {
+            if (confirm('确定要清空所有阅读记录吗？此操作不可恢复！')) {
+                historyManager.history = [];
+                historyManager.saveHistory();
+                generateStats();
+                updateAllTabs();
+            }
+        }
+        
+        // 设置标签页切换
+        function setupTabs() {
+            const tabLinks = document.querySelectorAll('.tab-link');
+            const tabContents = document.querySelectorAll('.tab-content');
+            
+            tabLinks.forEach(link => {
+                link.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    
+                    // 移除所有活动状态
+                    tabLinks.forEach(l => l.classList.remove('active'));
+                    tabContents.forEach(c => c.classList.remove('active'));
+                    
+                    // 添加当前活动状态
+                    this.classList.add('active');
+                    const targetTab = this.dataset.tab;
+                    document.getElementById(targetTab).classList.add('active');
+                    
+                    // 更新当前标签页
+                    historyManager.currentTab = targetTab;
+                    updateAllTabs();
+                });
+            });
+        }
+        
+        // 设置排序和搜索
+        function setupFilters() {
+            const sortSelect = document.getElementById('sortSelect');
+            const searchInput = document.getElementById('searchInput');
+            const clearBtn = document.getElementById('clearHistoryBtn');
+            
+            sortSelect.addEventListener('change', function() {
+                historyManager.currentSort = this.value;
+                updateAllTabs();
+            });
+            
+            searchInput.addEventListener('input', function() {
+                historyManager.searchQuery = this.value;
+                updateAllTabs();
+            });
+            
+            clearBtn.addEventListener('click', clearAllHistory);
+        }
+        
+        // 初始化页面
+        document.addEventListener('DOMContentLoaded', function() {
+            generateStats();
+            updateAllTabs();
+            setupTabs();
+            setupFilters();
+        });
+    </script>
+</body>
+</html>

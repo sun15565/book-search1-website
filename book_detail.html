@@ -1,0 +1,758 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>图书详情 - 书海阁</title>
+    <link rel="stylesheet" href="styles.css">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <style>
+        .book-detail-page {
+            background: #f8f9fa;
+            min-height: 100vh;
+        }
+        
+        .book-detail-header {
+            background: linear-gradient(135deg, #007bff, #0056b3);
+            color: white;
+            padding: 40px 0;
+        }
+        
+        .book-detail-content {
+            background: white;
+            border-radius: 15px;
+            margin: -50px auto 40px;
+            padding: 40px;
+            box-shadow: 0 8px 25px rgba(0,0,0,0.1);
+            max-width: 1000px;
+            position: relative;
+        }
+        
+        .book-main-info {
+            display: grid;
+            grid-template-columns: 300px 1fr;
+            gap: 40px;
+            margin-bottom: 40px;
+        }
+        
+        .book-cover-large {
+            width: 100%;
+            height: 400px;
+            border-radius: 12px;
+            overflow: hidden;
+            box-shadow: 0 8px 25px rgba(0,0,0,0.15);
+        }
+        
+        .book-cover-large img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+        
+        .book-info-detail {
+            padding: 20px 0;
+        }
+        
+        .book-title-large {
+            font-size: 32px;
+            font-weight: bold;
+            color: #333;
+            margin-bottom: 15px;
+            line-height: 1.3;
+        }
+        
+        .book-author-large {
+            font-size: 18px;
+            color: #666;
+            margin-bottom: 20px;
+        }
+        
+        .book-stats-large {
+            display: flex;
+            gap: 30px;
+            margin-bottom: 25px;
+        }
+        
+        .stat-item-large {
+            text-align: center;
+        }
+        
+        .stat-number-large {
+            font-size: 24px;
+            font-weight: bold;
+            color: #007bff;
+        }
+        
+        .stat-label-large {
+            font-size: 14px;
+            color: #666;
+        }
+        
+        .book-description-large {
+            color: #777;
+            font-size: 16px;
+            line-height: 1.6;
+            margin-bottom: 30px;
+        }
+        
+        .book-actions {
+            display: flex;
+            gap: 15px;
+            margin-bottom: 30px;
+        }
+        
+        .action-btn {
+            padding: 12px 25px;
+            border: none;
+            border-radius: 25px;
+            font-size: 16px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.3s;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+        }
+        
+        .btn-primary {
+            background: linear-gradient(135deg, #007bff, #0056b3);
+            color: white;
+        }
+        
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(0,123,255,0.3);
+            color: white;
+        }
+        
+        .btn-secondary {
+            background: #f8f9fa;
+            color: #666;
+            border: 2px solid #e9ecef;
+        }
+        
+        .btn-secondary:hover {
+            background: #e9ecef;
+            color: #333;
+        }
+        
+        .book-tabs {
+            border-bottom: 2px solid #e9ecef;
+            margin-bottom: 30px;
+        }
+        
+        .tab-list {
+            display: flex;
+            list-style: none;
+            margin: 0;
+            padding: 0;
+        }
+        
+        .tab-item {
+            margin-right: 30px;
+        }
+        
+        .tab-link {
+            display: block;
+            padding: 15px 0;
+            color: #666;
+            text-decoration: none;
+            font-weight: 500;
+            border-bottom: 3px solid transparent;
+            transition: all 0.3s;
+        }
+        
+        .tab-link:hover,
+        .tab-link.active {
+            color: #007bff;
+            border-bottom-color: #007bff;
+        }
+        
+        .tab-content {
+            display: none;
+        }
+        
+        .tab-content.active {
+            display: block;
+        }
+        
+        .chapter-list {
+            max-height: 400px;
+            overflow-y: auto;
+        }
+        
+        .chapter-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 15px 0;
+            border-bottom: 1px solid #f0f0f0;
+            transition: background-color 0.3s;
+        }
+        
+        .chapter-item:hover {
+            background-color: #f8f9fa;
+        }
+        
+        .chapter-item:last-child {
+            border-bottom: none;
+        }
+        
+        .chapter-title {
+            color: #333;
+            font-weight: 500;
+        }
+        
+        .chapter-date {
+            color: #999;
+            font-size: 14px;
+        }
+        
+        .back-to-home {
+            position: fixed;
+            top: 20px;
+            left: 20px;
+            background: rgba(0,0,0,0.7);
+            color: white;
+            padding: 10px 15px;
+            border-radius: 25px;
+            text-decoration: none;
+            font-size: 14px;
+            transition: all 0.3s;
+            z-index: 1000;
+        }
+        
+        .back-to-home:hover {
+            background: rgba(0,0,0,0.9);
+            color: white;
+        }
+        
+        .related-books {
+            margin-top: 40px;
+        }
+        
+        .related-books h3 {
+            font-size: 20px;
+            color: #333;
+            margin-bottom: 20px;
+        }
+        
+        .related-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+            gap: 20px;
+        }
+        
+        .related-book {
+            background: white;
+            border-radius: 8px;
+            overflow: hidden;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+            transition: transform 0.3s;
+            cursor: pointer;
+        }
+        
+        .related-book:hover {
+            transform: translateY(-3px);
+        }
+        
+        .related-cover {
+            width: 100%;
+            height: 200px;
+            overflow: hidden;
+        }
+        
+        .related-cover img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+        
+        .related-info {
+            padding: 15px;
+        }
+        
+        .related-title {
+            font-size: 14px;
+            font-weight: bold;
+            color: #333;
+            margin-bottom: 5px;
+            line-height: 1.3;
+            display: -webkit-box;
+            -webkit-line-clamp: 2;
+            -webkit-box-orient: vertical;
+            overflow: hidden;
+        }
+        
+        .related-author {
+            font-size: 12px;
+            color: #666;
+        }
+        
+        @media (max-width: 768px) {
+            .book-main-info {
+                grid-template-columns: 1fr;
+                gap: 20px;
+            }
+            
+            .book-cover-large {
+                height: 300px;
+            }
+            
+            .book-title-large {
+                font-size: 24px;
+            }
+            
+            .book-actions {
+                flex-direction: column;
+            }
+            
+            .related-grid {
+                grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+            }
+        }
+    </style>
+</head>
+<body>
+    <a href="index.html" class="back-to-home">
+        <i class="fas fa-arrow-left"></i> 返回首页
+    </a>
+    
+    <div class="book-detail-page">
+        <div class="book-detail-header">
+            <div class="container">
+                <h1>图书详情</h1>
+            </div>
+        </div>
+        
+        <div class="container">
+            <div class="book-detail-content">
+                <div class="book-main-info">
+                    <div class="book-cover-large">
+                        <img id="bookCover" src="" alt="" onerror="this.src='https://via.placeholder.com/300x400/cccccc/666666?text=暂无封面'">
+                    </div>
+                    <div class="book-info-detail">
+                        <h2 id="bookTitle" class="book-title-large">图书标题</h2>
+                        <p id="bookAuthor" class="book-author-large">作者：未知</p>
+                        <div class="book-stats-large">
+                            <div class="stat-item-large">
+                                <div id="bookRating" class="stat-number-large">0.0</div>
+                                <div class="stat-label-large">评分</div>
+                            </div>
+                            <div class="stat-item-large">
+                                <div id="bookViews" class="stat-number-large">0</div>
+                                <div class="stat-label-large">阅读量</div>
+                            </div>
+                            <div class="stat-item-large">
+                                <div id="bookChapters" class="stat-number-large">0</div>
+                                <div class="stat-label-large">章节数</div>
+                            </div>
+                        </div>
+                        <p id="bookDescription" class="book-description-large">图书描述...</p>
+                        <div class="book-actions">
+                            <a href="#" id="readBtn" class="action-btn btn-primary">
+                                <i class="fas fa-book-open"></i> 开始阅读
+                            </a>
+                            <a href="#" id="collectBtn" class="action-btn btn-secondary">
+                                <i class="fas fa-heart"></i> 收藏
+                            </a>
+                            <a href="#" id="shareBtn" class="action-btn btn-secondary">
+                                <i class="fas fa-share"></i> 分享
+                            </a>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="book-tabs">
+                    <ul class="tab-list">
+                        <li class="tab-item">
+                            <a href="#chapters" class="tab-link active" data-tab="chapters">章节目录</a>
+                        </li>
+                        <li class="tab-item">
+                            <a href="#reviews" class="tab-link" data-tab="reviews">读者评价</a>
+                        </li>
+                        <li class="tab-item">
+                            <a href="#info" class="tab-link" data-tab="info">图书信息</a>
+                        </li>
+                    </ul>
+                </div>
+                
+                <div id="chapters" class="tab-content active">
+                    <h3>章节目录</h3>
+                    <div class="chapter-list" id="chapterList">
+                        <!-- 动态生成章节列表 -->
+                    </div>
+                </div>
+                
+                <div id="reviews" class="tab-content">
+                    <h3>读者评价</h3>
+                    <div id="reviewList">
+                        <!-- 动态生成评价列表 -->
+                    </div>
+                </div>
+                
+                <div id="info" class="tab-content">
+                    <h3>图书信息</h3>
+                    <div id="bookInfo">
+                        <!-- 动态生成图书信息 -->
+                    </div>
+                </div>
+                
+                <div class="related-books">
+                    <h3>相关推荐</h3>
+                    <div class="related-grid" id="relatedBooks">
+                        <!-- 动态生成相关图书 -->
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <script src="book_data.js"></script>
+    <script>
+        // 获取URL参数
+        function getUrlParameter(name) {
+            const urlParams = new URLSearchParams(window.location.search);
+            return urlParams.get(name);
+        }
+        
+        // 获取图书ID
+        const bookId = getUrlParameter('id');
+        
+        // 查找图书信息
+        function findBookById(id) {
+            // 在所有图书数据中查找
+            const allBooks = [
+                ...bookData.recommendedNewBooks,
+                ...bookData.romanceBooks,
+                ...bookData.originalBooks
+            ];
+            
+            return allBooks.find(book => book.id == id);
+        }
+        
+        // 加载图书详情
+        function loadBookDetail() {
+            const book = findBookById(bookId);
+            
+            if (book) {
+                // 更新页面标题
+                document.title = `${book.title} - 书海阁`;
+                
+                // 更新图书信息
+                document.getElementById('bookCover').src = book.cover;
+                document.getElementById('bookCover').alt = book.title;
+                document.getElementById('bookTitle').textContent = book.title;
+                document.getElementById('bookAuthor').textContent = `作者：${book.author}`;
+                document.getElementById('bookRating').textContent = book.rating;
+                document.getElementById('bookViews').textContent = book.views;
+                document.getElementById('bookChapters').textContent = book.chapters || '156';
+                document.getElementById('bookDescription').textContent = book.description;
+                
+                // 生成章节列表
+                generateChapterList(book);
+                
+                // 生成评价列表
+                generateReviewList(book);
+                
+                // 生成图书信息
+                generateBookInfo(book);
+                
+                // 生成相关推荐
+                generateRelatedBooks(book);
+            } else {
+                // 图书不存在
+                document.getElementById('bookTitle').textContent = '图书不存在';
+                document.getElementById('bookDescription').textContent = '抱歉，您访问的图书不存在或已被删除。';
+            }
+        }
+        
+        // 生成章节列表
+        function generateChapterList(book) {
+            const chapterList = document.getElementById('chapterList');
+            const chapters = [];
+            
+            // 生成示例章节
+            for (let i = 1; i <= 20; i++) {
+                chapters.push({
+                    title: `第${i}章 ${book.title}的精彩内容`,
+                    date: `2024-07-${String(i).padStart(2, '0')}`
+                });
+            }
+            
+            const html = chapters.map(chapter => `
+                <div class="chapter-item" onclick="readChapter('${chapter.title}')">
+                    <div class="chapter-title">${chapter.title}</div>
+                    <div class="chapter-date">${chapter.date}</div>
+                </div>
+            `).join('');
+            
+            chapterList.innerHTML = html;
+        }
+        
+        // 生成评价列表
+        function generateReviewList(book) {
+            const reviewList = document.getElementById('reviewList');
+            const reviews = [
+                {
+                    user: '读者A',
+                    rating: 5,
+                    comment: '非常精彩的一本书，强烈推荐！',
+                    date: '2024-07-10'
+                },
+                {
+                    user: '读者B',
+                    rating: 4,
+                    comment: '故事情节紧凑，值得一读。',
+                    date: '2024-07-09'
+                },
+                {
+                    user: '读者C',
+                    rating: 5,
+                    comment: '作者文笔很好，期待后续章节。',
+                    date: '2024-07-08'
+                }
+            ];
+            
+            const html = reviews.map(review => `
+                <div style="padding: 20px; border-bottom: 1px solid #f0f0f0;">
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
+                        <strong>${review.user}</strong>
+                        <div>
+                            <span style="color: #ffc107;">${'★'.repeat(review.rating)}${'☆'.repeat(5-review.rating)}</span>
+                            <span style="color: #999; font-size: 14px; margin-left: 10px;">${review.date}</span>
+                        </div>
+                    </div>
+                    <p style="color: #666; line-height: 1.6;">${review.comment}</p>
+                </div>
+            `).join('');
+            
+            reviewList.innerHTML = html;
+        }
+        
+        // 生成图书信息
+        function generateBookInfo(book) {
+            const bookInfo = document.getElementById('bookInfo');
+            const info = {
+                '书名': book.title,
+                '作者': book.author,
+                '分类': '网络小说',
+                '状态': '连载中',
+                '字数': '50万字',
+                '更新时间': '2024-07-10',
+                '标签': '都市、言情、现代'
+            };
+            
+            const html = Object.entries(info).map(([key, value]) => `
+                <div style="display: flex; padding: 10px 0; border-bottom: 1px solid #f0f0f0;">
+                    <div style="width: 100px; color: #666; font-weight: 500;">${key}：</div>
+                    <div style="color: #333;">${value}</div>
+                </div>
+            `).join('');
+            
+            bookInfo.innerHTML = html;
+        }
+        
+        // 生成相关推荐
+        function generateRelatedBooks(book) {
+            const relatedBooks = document.getElementById('relatedBooks');
+            const allBooks = [
+                ...bookData.recommendedNewBooks,
+                ...bookData.romanceBooks,
+                ...bookData.originalBooks
+            ];
+            
+            // 排除当前图书，随机选择4本
+            const filteredBooks = allBooks.filter(b => b.id != book.id);
+            const randomBooks = filteredBooks.sort(() => 0.5 - Math.random()).slice(0, 4);
+            
+            const html = randomBooks.map(relatedBook => `
+                <div class="related-book" onclick="goToBook(${relatedBook.id})">
+                    <div class="related-cover">
+                        <img src="${relatedBook.cover}" alt="${relatedBook.title}" onerror="this.src='https://via.placeholder.com/150x200/cccccc/666666?text=暂无封面'">
+                    </div>
+                    <div class="related-info">
+                        <div class="related-title">${relatedBook.title}</div>
+                        <div class="related-author">${relatedBook.author}</div>
+                    </div>
+                </div>
+            `).join('');
+            
+            relatedBooks.innerHTML = html;
+        }
+        
+        // 阅读章节
+        function readChapter(chapterTitle) {
+            alert(`开始阅读：${chapterTitle}\n\n在实际应用中，这里会跳转到阅读页面。`);
+        }
+        
+        // 跳转到其他图书
+        function goToBook(bookId) {
+            window.location.href = `book_detail.html?id=${bookId}`;
+        }
+        
+        // 设置按钮事件
+        function setupButtons() {
+            const bookId = getUrlParameter('id');
+            
+            document.getElementById('readBtn').addEventListener('click', function(e) {
+                e.preventDefault();
+                // 添加阅读记录
+                historyManager.addReadingRecord(bookId, 5); // 开始阅读，设置5%进度
+                alert('开始阅读\n\n已添加到阅读记录！\n\n在实际应用中，这里会跳转到阅读页面。');
+            });
+            
+            document.getElementById('collectBtn').addEventListener('click', function(e) {
+                e.preventDefault();
+                const isFav = historyManager.toggleFavorite(bookId);
+                if (isFav) {
+                    this.innerHTML = '<i class="fas fa-heart" style="color: #ff6b6b;"></i> 已收藏';
+                    this.style.color = '#ff6b6b';
+                } else {
+                    this.innerHTML = '<i class="fas fa-heart"></i> 收藏';
+                    this.style.color = '#666';
+                }
+            });
+            
+            document.getElementById('shareBtn').addEventListener('click', function(e) {
+                e.preventDefault();
+                alert('分享功能\n\n在实际应用中，这里会打开分享对话框。');
+            });
+        }
+        
+        // 设置标签页切换
+        function setupTabs() {
+            const tabLinks = document.querySelectorAll('.tab-link');
+            const tabContents = document.querySelectorAll('.tab-content');
+            
+            tabLinks.forEach(link => {
+                link.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    
+                    // 移除所有活动状态
+                    tabLinks.forEach(l => l.classList.remove('active'));
+                    tabContents.forEach(c => c.classList.remove('active'));
+                    
+                    // 添加当前活动状态
+                    this.classList.add('active');
+                    const targetTab = this.dataset.tab;
+                    document.getElementById(targetTab).classList.add('active');
+                });
+            });
+        }
+        
+        // 阅读记录管理
+        class ReadingHistoryManager {
+            constructor() {
+                this.storageKey = 'readingHistory';
+                this.favoritesKey = 'favoriteBooks';
+            }
+            
+            loadHistory() {
+                const stored = localStorage.getItem(this.storageKey);
+                return stored ? JSON.parse(stored) : [];
+            }
+            
+            saveHistory(history) {
+                localStorage.setItem(this.storageKey, JSON.stringify(history));
+            }
+            
+            loadFavorites() {
+                const stored = localStorage.getItem(this.favoritesKey);
+                return stored ? JSON.parse(stored) : [];
+            }
+            
+            saveFavorites(favorites) {
+                localStorage.setItem(this.favoritesKey, JSON.stringify(favorites));
+            }
+            
+            addReadingRecord(bookId, progress = 0) {
+                const history = this.loadHistory();
+                const book = findBookById(bookId);
+                if (!book) return false;
+                
+                const existingRecord = history.find(record => record.bookId === bookId);
+                const now = new Date().toISOString();
+                
+                if (existingRecord) {
+                    existingRecord.progress = Math.max(existingRecord.progress, progress);
+                    existingRecord.lastReadTime = now;
+                    existingRecord.readCount = (existingRecord.readCount || 0) + 1;
+                } else {
+                    history.unshift({
+                        bookId: bookId,
+                        title: book.title,
+                        author: book.author,
+                        cover: book.cover,
+                        progress: progress,
+                        lastReadTime: now,
+                        readCount: 1,
+                        totalChapters: book.chapters || 156,
+                        isCompleted: progress >= 100
+                    });
+                }
+                
+                this.saveHistory(history);
+                return true;
+            }
+            
+            updateProgress(bookId, progress) {
+                const history = this.loadHistory();
+                const record = history.find(record => record.bookId === bookId);
+                if (record) {
+                    record.progress = Math.min(100, Math.max(0, progress));
+                    record.lastReadTime = new Date().toISOString();
+                    record.isCompleted = record.progress >= 100;
+                    this.saveHistory(history);
+                    return true;
+                }
+                return false;
+            }
+            
+            toggleFavorite(bookId) {
+                const favorites = this.loadFavorites();
+                const index = favorites.indexOf(bookId);
+                if (index > -1) {
+                    favorites.splice(index, 1);
+                } else {
+                    favorites.push(bookId);
+                }
+                this.saveFavorites(favorites);
+                return !favorites.includes(bookId);
+            }
+            
+            isFavorite(bookId) {
+                const favorites = this.loadFavorites();
+                return favorites.includes(bookId);
+            }
+        }
+        
+        // 初始化阅读记录管理器
+        const historyManager = new ReadingHistoryManager();
+        
+        // 更新按钮状态
+        function updateButtonStates() {
+            const bookId = getUrlParameter('id');
+            const isFav = historyManager.isFavorite(bookId);
+            const collectBtn = document.getElementById('collectBtn');
+            
+            if (isFav) {
+                collectBtn.innerHTML = '<i class="fas fa-heart" style="color: #ff6b6b;"></i> 已收藏';
+                collectBtn.style.color = '#ff6b6b';
+            } else {
+                collectBtn.innerHTML = '<i class="fas fa-heart"></i> 收藏';
+                collectBtn.style.color = '#666';
+            }
+        }
+        
+        // 初始化页面
+        document.addEventListener('DOMContentLoaded', function() {
+            loadBookDetail();
+            setupButtons();
+            setupTabs();
+            updateButtonStates();
+        });
+    </script>
+</body>
+</html>

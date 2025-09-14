@@ -1,0 +1,149 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>书海阁 - 在线图书查找平台</title>
+    <link rel="stylesheet" href="styles.css">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+</head>
+<body>
+    <!-- 顶部导航栏 -->
+    <div class="top-bar">
+        <div class="container">
+            <div class="top-left">
+             
+            </div>
+            <div class="top-right">
+                <a href="login.html" class="top-link">登录</a>
+                <a href="register.html" class="top-link">用户注册</a>
+            </div>
+        </div>
+    </div>
+
+    <!-- 头部区域 -->
+    <header class="header">
+        <div class="container">
+            <div class="header-content">
+                <div class="logo">
+                    <h1>书海阁</h1>
+                </div>
+                <div class="search-box">
+                    <input type="text" id="searchInput" placeholder="快速搜索、找书、找作者">
+                    <button id="searchBtn"><i class="fas fa-search"></i></button>
+                </div>
+                <div class="header-links">
+                    <a href="reading_history.html" class="header-link">
+                        <i class="fas fa-history"></i> 阅读记录
+                        <span id="readingCount" style="background: #ff6b6b; color: white; border-radius: 10px; padding: 2px 6px; font-size: 12px; margin-left: 5px;">0</span>
+                    </a>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <!-- 主导航栏 -->
+    <nav class="main-nav">
+        <div class="container">
+            <ul class="nav-list">
+                <li><a href="#" class="nav-link active">首页</a></li>
+                <li><a href="ranking.html" class="nav-link">排行榜</a></li>
+                <li><a href="daily_read.html" class="nav-link">每日一读</a></li>
+                <li><a href="reading_history.html" class="nav-link">阅读记录</a></li>
+            </ul>
+        </div>
+    </nav>
+
+    <!-- 主要内容区域 -->
+    <main class="main-content">
+        <div class="container">
+            <!-- 图书展示区域 -->
+            <section class="book-showcase">
+                <!-- 推荐新书 -->
+                <div class="book-section">
+                    <div class="section-header">
+                        <h3 class="section-title">推荐新书</h3>
+                        <a href="#" class="more-link">更多></a>
+                    </div>
+                    <div class="books-grid" id="recommendedNewBooks">
+                        <!-- 动态生成内容 -->
+                    </div>
+                </div>
+
+                <!-- 言情好文 -->
+                <div class="book-section">
+                    <div class="section-header">
+                        <h3 class="section-title">下载最多</h3>
+                        <a href="#" class="more-link">更多></a>
+                    </div>
+                    <div class="books-grid" id="romanceBooks">
+                        <!-- 动态生成内容 -->
+                    </div>
+                </div>
+
+                <!-- 原创畅读 -->
+                <div class="book-section">
+                    <div class="section-header">
+                        <h3 class="section-title">原创畅读</h3>
+                        <a href="#" class="more-link">更多></a>
+                    </div>
+                    <div class="books-grid" id="originalBooks">
+                        <!-- 动态生成内容 -->
+                    </div>
+                </div>
+            </section>
+
+            <!-- 最近更新和最新入库 -->
+            <section class="book-lists">
+                <div class="list-container">
+                    <div class="book-list-section">
+                        <h3 class="list-title">最近更新小说</h3>
+                        <div class="list-table">
+                            <div class="list-header">
+                                <span class="col-category">分类</span>
+                                <span class="col-title">书名</span>
+                                <span class="col-chapter">章节</span>
+                                <span class="col-author">作者</span>
+                                <span class="col-date">更新时间</span>
+                            </div>
+                            <div class="list-body" id="recentUpdates">
+                                <!-- 动态生成内容 -->
+                            </div>
+                        </div>
+                    </div>
+                    <div class="book-list-section">
+                        <h3 class="list-title">最新入库小说</h3>
+                        <div class="list-table">
+                            <div class="list-header">
+                                <span class="col-category">分类</span>
+                                <span class="col-title">书名</span>
+                                <span class="col-author">作者</span>
+                                <span class="col-date">入库时间</span>
+                            </div>
+                            <div class="list-body" id="newBooks">
+                                <!-- 动态生成内容 -->
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+        </div>
+    </main>
+
+    <!-- 页脚 -->
+    <footer class="footer">
+        <div class="container">
+            <div class="footer-links">
+                <a href="#" class="footer-link">关于此网站</a>
+            </div>
+            <div class="footer-disclaimer">
+                <p>web作业1</p>
+               
+            </div>
+        </div>
+    </footer>
+
+    <script src="book_data.js"></script>
+    <script src="script.js"></script>
+</body>
+</html>
