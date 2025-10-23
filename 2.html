@@ -1,0 +1,3177 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Vue寻宝游戏 - 完整版</title>
+    <script src="https://unpkg.com/vue@3.3.4/dist/vue.global.prod.js"></script>
+    <script src="https://unpkg.com/vue-router@4.2.4/dist/vue-router.global.js"></script>
+    <script src="https://unpkg.com/vue-demi@0.14.6/lib/index.iife.js"></script>
+    <script src="https://unpkg.com/pinia@2.1.6/dist/pinia.iife.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            -webkit-font-smoothing: antialiased;
+            -moz-osx-font-smoothing: grayscale;
+        }
+
+        #app {
+            min-height: 100vh;
+        }
+
+        button {
+            cursor: pointer;
+            border: none;
+            outline: none;
+            font-family: inherit;
+        }
+
+        input, textarea {
+            font-family: inherit;
+            outline: none;
+        }
+
+        .app-container {
+            min-height: 100vh;
+            background: linear-gradient(135deg, #fff9e6 0%, #fff5d6 100%);
+        }
+
+        .navbar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 1rem 2rem;
+            background: rgba(255, 255, 255, 0.95);
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+            backdrop-filter: blur(10px);
+        }
+
+        .nav-brand {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            font-size: 1.5rem;
+            font-weight: bold;
+            color: #667eea;
+        }
+
+        .logo {
+            font-size: 2rem;
+        }
+
+        .nav-links {
+            display: flex;
+            gap: 2rem;
+        }
+
+        .nav-link {
+            text-decoration: none;
+            color: #333;
+            font-weight: 500;
+            padding: 0.5rem 1rem;
+            border-radius: 8px;
+            transition: all 0.3s ease;
+        }
+
+        .nav-link:hover {
+            background: #ffc107;
+            color: #333;
+        }
+
+        .nav-link.router-link-active {
+            background: #ffc107;
+            color: #333;
+        }
+
+        .user-info {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            margin-left: 1rem;
+            padding-left: 1rem;
+            border-left: 1px solid #e0e0e0;
+        }
+
+        .user-name {
+            color: #333;
+            font-weight: 600;
+        }
+
+        .logout-btn {
+            background: #f44336;
+            color: white;
+            border: none;
+            padding: 0.5rem 1rem;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 0.9rem;
+            transition: background-color 0.3s ease;
+        }
+
+        .logout-btn:hover {
+            background: #d32f2f;
+        }
+
+        .main-content {
+            padding: 2rem;
+        }
+
+        /* 游戏布局 */
+        .game-view {
+            min-height: calc(100vh - 100px);
+            padding: 1rem;
+        }
+
+        .game-layout {
+            display: grid;
+            grid-template-columns: 300px 1fr 300px;
+            gap: 1.5rem;
+            max-width: 1800px;
+            margin: 0 auto;
+        }
+
+        .left-panel,
+        .right-panel {
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+        }
+
+        .game-area {
+            background: white;
+            border-radius: 20px;
+            padding: 2rem;
+            box-shadow: 0 10px 40px rgba(255, 193, 7, 0.2);
+            border: 2px solid #ffc107;
+        }
+
+        /* 认证页面 */
+        .auth-page {
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: linear-gradient(135deg, #fff9e6 0%, #fff5d6 100%);
+            padding: 2rem;
+        }
+
+        .auth-container {
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 20px 60px rgba(255, 193, 7, 0.3);
+            border: 2px solid #ffc107;
+            width: 500px;
+            min-width: 500px;
+            overflow: hidden;
+        }
+
+        .auth-tabs {
+            display: flex;
+            background: #f8f9fa;
+            border-bottom: 2px solid #e0e0e0;
+        }
+
+        .tab-btn {
+            flex: 1;
+            padding: 1rem;
+            border: none;
+            background: transparent;
+            cursor: pointer;
+            font-size: 1.1rem;
+            font-weight: 600;
+            color: #666;
+            transition: all 0.3s ease;
+        }
+
+        .tab-btn.active {
+            background: #ffc107;
+            color: #333;
+        }
+
+        .tab-btn:hover:not(.active) {
+            background: #e9ecef;
+            color: #333;
+        }
+
+        .auth-content {
+            padding: 2rem;
+        }
+
+        /* 表单样式 */
+        .form-container {
+            background: white;
+            border-radius: 20px;
+            padding: 3rem;
+            box-shadow: 0 20px 60px rgba(255, 193, 7, 0.3);
+            border: 2px solid #ffc107;
+            width: 400px;
+            min-width: 400px;
+        }
+
+        .form-header {
+            text-align: center;
+            margin-bottom: 2rem;
+        }
+
+        .form-header h2 {
+            color: #f57c00;
+            font-size: 2rem;
+            margin: 0 0 0.5rem 0;
+        }
+
+        .form-header p {
+            color: #666;
+            margin: 0;
+        }
+
+        .form-group {
+            margin-bottom: 1.5rem;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 0.5rem;
+            color: #333;
+            font-weight: 600;
+        }
+
+        .form-input {
+            width: 100%;
+            padding: 1rem;
+            border: 2px solid #e0e0e0;
+            border-radius: 10px;
+            font-size: 1rem;
+            transition: border-color 0.3s ease;
+            box-sizing: border-box;
+        }
+
+        .form-input:focus {
+            outline: none;
+            border-color: #ffc107;
+            box-shadow: 0 0 0 3px rgba(255, 193, 7, 0.1);
+        }
+
+        .btn {
+            width: 100%;
+            padding: 1rem;
+            border: none;
+            border-radius: 10px;
+            font-size: 1.1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            margin-bottom: 1rem;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #ffc107 0%, #ffb300 100%);
+            color: #333;
+        }
+
+        .btn-primary:hover:not(:disabled) {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(255, 193, 7, 0.4);
+        }
+
+        .btn:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .form-footer {
+            text-align: center;
+        }
+
+        .form-footer a {
+            color: #ffc107;
+            text-decoration: none;
+            font-weight: 600;
+        }
+
+        .form-footer a:hover {
+            text-decoration: underline;
+        }
+
+        .avatar-grid {
+            display: grid;
+            grid-template-columns: repeat(6, 1fr);
+            gap: 0.5rem;
+            margin-top: 0.5rem;
+        }
+
+        .avatar-option {
+            font-size: 2rem;
+            padding: 1rem;
+            text-align: center;
+            background: #f8f9fa;
+            border: 2px solid transparent;
+            border-radius: 10px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .avatar-option:hover {
+            background: #e9ecef;
+            transform: scale(1.1);
+        }
+
+        .avatar-option.active {
+            border-color: #ffc107;
+            background: #fff9e6;
+        }
+
+        /* 玩家信息样式 */
+        .player-info {
+            background: white;
+            border-radius: 15px;
+            padding: 1.5rem;
+            box-shadow: 0 5px 20px rgba(255, 193, 7, 0.2);
+            border: 2px solid #ffc107;
+            margin-bottom: 1rem;
+        }
+
+        .player-header {
+            text-align: center;
+            margin-bottom: 1.5rem;
+        }
+
+        .avatar {
+            font-size: 3rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .player-name {
+            font-size: 1.2rem;
+            font-weight: 600;
+            color: #333;
+        }
+
+        .player-stats {
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+        }
+
+        .stat-item {
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
+        }
+
+        .stat-label {
+            font-size: 0.9rem;
+            color: #666;
+            font-weight: 500;
+        }
+
+        .stat-value {
+            font-size: 1rem;
+            font-weight: 600;
+            color: #333;
+        }
+
+        .exp-bar, .health-bar {
+            width: 100%;
+            height: 8px;
+            background: #e0e0e0;
+            border-radius: 4px;
+            overflow: hidden;
+            position: relative;
+        }
+
+        .exp-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #4caf50, #8bc34a);
+            border-radius: 4px;
+            transition: width 0.3s ease;
+        }
+
+        .health-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #f44336, #ff9800);
+            border-radius: 4px;
+            transition: width 0.3s ease;
+        }
+
+        /* 任务面板样式 */
+        .task-panel {
+            background: white;
+            border-radius: 15px;
+            padding: 1.5rem;
+            box-shadow: 0 5px 20px rgba(0, 0, 0, 0.15);
+            border: 2px solid #ffc107;
+            max-height: 600px;
+            overflow-y: auto;
+        }
+
+        .panel-header {
+            margin-bottom: 1rem;
+        }
+
+        .panel-header h3 {
+            color: #f57c00;
+            font-size: 1.2rem;
+            margin: 0;
+        }
+
+        .tasks-container {
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+        }
+
+        .task-item {
+            display: flex;
+            gap: 1rem;
+            padding: 1rem;
+            background: #fff9e6;
+            border-radius: 10px;
+            border-left: 4px solid #ffc107;
+            transition: all 0.3s ease;
+        }
+
+        .task-item:hover {
+            transform: translateX(5px);
+            box-shadow: 0 3px 10px rgba(0, 0, 0, 0.1);
+        }
+
+        .task-item.completed {
+            opacity: 0.7;
+            border-left-color: #43e97b;
+        }
+
+        .task-icon {
+            font-size: 2rem;
+            flex-shrink: 0;
+        }
+
+        .task-content {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
+        }
+
+        .task-title {
+            font-size: 1rem;
+            color: #333;
+            margin: 0;
+        }
+
+        .task-description {
+            font-size: 0.85rem;
+            color: #666;
+            margin: 0;
+        }
+
+        .task-progress {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .progress-bar {
+            flex: 1;
+            height: 6px;
+            background: #e0e0e0;
+            border-radius: 3px;
+            overflow: hidden;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #ffc107 0%, #ffb300 100%);
+            transition: width 0.3s ease;
+        }
+
+        .progress-text {
+            font-size: 0.8rem;
+            color: #666;
+            white-space: nowrap;
+        }
+
+        .task-reward {
+            display: flex;
+            gap: 0.5rem;
+            font-size: 0.85rem;
+            color: #f57c00;
+            font-weight: 600;
+        }
+
+        /* 商店样式 */
+        .shop {
+            background: white;
+            border-radius: 15px;
+            padding: 1.5rem;
+            box-shadow: 0 5px 20px rgba(0, 0, 0, 0.15);
+            border: 2px solid #ffc107;
+            max-height: 500px;
+            overflow-y: auto;
+        }
+
+        .shop-header {
+            margin-bottom: 1rem;
+        }
+
+        .shop-header h3 {
+            color: #f57c00;
+            font-size: 1.2rem;
+            margin: 0;
+        }
+
+        .shop-content {
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+        }
+
+        .shop-item {
+            display: flex;
+            gap: 1rem;
+            padding: 1rem;
+            background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+            border-radius: 10px;
+            border: 2px solid transparent;
+            transition: all 0.3s ease;
+        }
+
+        .shop-item:hover {
+            border-color: #ffc107;
+            transform: translateY(-3px);
+            box-shadow: 0 5px 15px rgba(255, 193, 7, 0.3);
+        }
+
+        .item-icon {
+            font-size: 2.5rem;
+            flex-shrink: 0;
+        }
+
+        .item-info {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
+        }
+
+        .item-name {
+            font-size: 1rem;
+            color: #333;
+            margin: 0;
+        }
+
+        .item-effect {
+            font-size: 0.85rem;
+            color: #666;
+            margin: 0;
+        }
+
+        .item-footer {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-top: 0.5rem;
+        }
+
+        .item-price {
+            font-size: 1rem;
+            color: #f57c00;
+            font-weight: 600;
+        }
+
+        .buy-btn {
+            padding: 0.5rem 1rem;
+            background: linear-gradient(135degrips, #ffc107 0%, #ffb300 100%);
+            color: #333;
+            border-radius: 8px;
+            font-weight: 600;
+            transition: all 0.3s ease;
+        }
+
+        .buy-btn:hover:not(:disabled) {
+            transform: scale(1.05);
+            box-shadow: 0 3px 10px rgba(255, 193, 7, 0.5);
+        }
+
+        .buy-btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        /* 背包样式 */
+        .inventory {
+            background: white;
+            border-radius: 15px;
+            padding: 1.5rem;
+            box-shadow: 0 5px 20px rgba(0, 0, 0, 0.15);
+            border: 2px solid #ffc107;
+            max-height: 400px;
+            overflow-y: auto;
+        }
+
+        .inventory-header {
+            margin-bottom: 1rem;
+        }
+
+        .inventory-header h3 {
+            color: #f57c00;
+            font-size: 1.2rem;
+            margin: 0;
+        }
+
+        .inventory-content {
+            display: flex;
+            flex-direction: column;
+            gap: 0.8rem;
+        }
+
+        .empty-inventory {
+            text-align: center;
+            padding: 2rem;
+            color: #999;
+        }
+
+        .empty-inventory p {
+            margin: 0.5rem 0;
+        }
+
+        .hint {
+            font-size: 0.9rem;
+            color: #f57c00;
+        }
+
+        .inventory-item {
+            display: flex;
+            gap: 1rem;
+            padding: 0.8rem;
+            background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+            border-radius: 10px;
+            border-left: 4px solid #43e97b;
+            transition: all 0.3s ease;
+        }
+
+        .inventory-item:hover {
+            transform: translateX(5px);
+            box-shadow: 0 3px 10px rgba(0, 0, 0, 0.1);
+        }
+
+        .item-details h4 {
+            font-size: 0.95rem;
+            color: #333;
+            margin: 0 0 0.3rem 0;
+        }
+
+        .item-date {
+            font-size: 0.75rem;
+            color: #999;
+            margin: 0;
+        }
+
+        /* 地图样式 */
+        .map-view {
+            display: flex;
+            flex-direction: column;
+            gap: 1.5rem;
+            height: 100%;
+        }
+
+        .exploration-areas {
+            background: white;
+            border-radius: 20px;
+            padding: 2rem;
+            box-shadow: 0 10px 40px rgba(255, 193, 7, 0.2);
+            border: 2px solid #ffc107;
+            margin-bottom: 2rem;
+        }
+
+        .areas-header {
+            text-align: center;
+            margin-bottom: 2rem;
+        }
+
+        .areas-header h2 {
+            color: #f57c00;
+            font-size: 1.8rem;
+            margin: 0;
+        }
+
+        .areas-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 1.5rem;
+        }
+
+        .area-card {
+            background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+            border: 2px solid transparent;
+            border-radius: 15px;
+            padding: 1.5rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: flex;
+            gap: 1rem;
+            align-items: center;
+        }
+
+        .area-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+        }
+
+        .area-card.selected {
+            border-color: #ffc107;
+            background: linear-gradient(135deg, #fff9e6 0%, #ffeaa7 100%);
+            box-shadow: 0 10px 30px rgba(255, 193, 7, 0.3);
+        }
+
+        .area-card.locked {
+            opacity: 0.6;
+            cursor: not-allowed;
+            background: linear-gradient(135deg, #f5f5f5 0%, #e0e0e0 100%);
+        }
+
+        .area-card.locked:hover {
+            transform: none;
+            box-shadow: none;
+        }
+
+        .area-icon {
+            font-size: 3rem;
+            flex-shrink: 0;
+        }
+
+        .area-info {
+            flex: 1;
+        }
+
+        .area-name {
+            font-size: 1.2rem;
+            color: #333;
+            margin: 0 0 0.5rem 0;
+            font-weight: 600;
+        }
+
+        .area-description {
+            color: #666;
+            font-size: 0.9rem;
+            margin: 0 0 1rem 0;
+            line-height: 1.4;
+        }
+
+        .area-meta {
+            display: flex;
+            gap: 0.5rem;
+            align-items: center;
+            flex-wrap: wrap;
+        }
+
+        .difficulty {
+            padding: 0.3rem 0.8rem;
+            border-radius: 20px;
+            font-size: 0.8rem;
+            font-weight: 600;
+            text-transform: uppercase;
+        }
+
+        .difficulty.easy {
+            background: #d4edda;
+            color: #155724;
+        }
+
+        .difficulty.medium {
+            background: #fff3cd;
+            color: #856404;
+        }
+
+        .difficulty.hard {
+            background: #f8d7da;
+            color: #721c24;
+        }
+
+        .difficulty.expert {
+            background: #d1ecf1;
+            color: #0c5460;
+        }
+
+        .reward {
+            background: #ffc107;
+            color: #333;
+            padding: 0.3rem 0.8rem;
+            border-radius: 20px;
+            font-size: 0.8rem;
+            font-weight: 600;
+        }
+
+        .locked-text {
+            background: #6c757d;
+            color: white;
+            padding: 0.3rem 0.8rem;
+            border-radius: 20px;
+            font-size: 0.8rem;
+            font-weight: 600;
+        }
+
+        /* 详细地图样式 */
+        .detailed-map {
+            background: white;
+            border-radius: 20px;
+            padding: 2rem;
+            box-shadow: 0 10px 40px rgba(255, 193, 7, 0.2);
+            border: 2px solid #ffc107;
+        }
+
+        .map-header {
+            text-align: center;
+            margin-bottom: 2rem;
+        }
+
+        .map-header h2 {
+            color: #f57c00;
+            font-size: 1.8rem;
+            margin: 0 0 0.5rem 0;
+        }
+
+        .map-header p {
+            color: #666;
+            margin: 0;
+        }
+
+        .map-container {
+            position: relative;
+        }
+
+        .map-background {
+            position: relative;
+            width: 100%;
+            height: 500px;
+            border-radius: 15px;
+            overflow: hidden;
+            background-size: cover;
+            background-position: center;
+        }
+
+        /* 不同区域的地图背景 */
+        .map-1 {
+            background: linear-gradient(135deg, #87CEEB 0%, #98FB98 50%, #F0E68C 100%);
+        }
+
+        .map-2 {
+            background: linear-gradient(135deg, #228B22 0%, #32CD32 50%, #90EE90 100%);
+        }
+
+        .map-3 {
+            background: linear-gradient(135deg, #D2691E 0%, #F4A460 50%, #DEB887 100%);
+        }
+
+        .treasure-point {
+            position: absolute;
+            width: 40px;
+            height: 40px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            transform: translate(-50%, -50%);
+        }
+
+        .treasure-point:hover {
+            transform: translate(-50%, -50%) scale(1.2);
+        }
+
+        .treasure-point.locked {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        .treasure-point.discovered {
+            opacity: 0.7;
+            cursor: default;
+        }
+
+        .treasure-icon {
+            font-size: 2rem;
+            text-align: center;
+            line-height: 40px;
+        }
+
+        .player-position {
+            position: absolute;
+            width: 50px;
+            height: 50px;
+            cursor: pointer;
+            transform: translate(-50%, -50%);
+            transition: all 0.3s ease;
+            z-index: 10;
+        }
+
+        .player-position:hover {
+            transform: translate(-50%, -50%) scale(1.1);
+        }
+
+        .player-avatar {
+            font-size: 2.5rem;
+            text-align: center;
+            line-height: 50px;
+            filter: drop-shadow(0 2px 4px rgba(0,0,0,0.3));
+        }
+
+        .map-legend {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            background: rgba(255, 255, 255, 0.9);
+            padding: 1rem;
+            border-radius: 10px;
+            backdrop-filter: blur(10px);
+        }
+
+        .legend-item {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            margin-bottom: 0.5rem;
+            font-size: 0.9rem;
+        }
+
+        .legend-item:last-child {
+            margin-bottom: 0;
+        }
+
+        .legend-icon {
+            font-size: 1.2rem;
+        }
+
+        .movement-hint {
+            position: absolute;
+            bottom: 10px;
+            left: 10px;
+            background: rgba(255, 255, 255, 0.9);
+            padding: 0.8rem;
+            border-radius: 10px;
+            backdrop-filter: blur(10px);
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            font-size: 0.9rem;
+        }
+
+        .hint-icon {
+            font-size: 1.2rem;
+        }
+
+        .no-area-selected {
+            height: 500px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .placeholder-content {
+            text-align: center;
+            color: #666;
+        }
+
+        .placeholder-icon {
+            font-size: 4rem;
+            margin-bottom: 1rem;
+        }
+
+        .placeholder-content h3 {
+            color: #333;
+            margin: 0 0 0.5rem 0;
+        }
+
+        .placeholder-content p {
+            margin: 0;
+        }
+
+        /* 用户管理页面样式 */
+        .user-management {
+            min-height: calc(100vh - 100px);
+            padding: 2rem;
+        }
+
+        .management-container {
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+
+        .section-header {
+            text-align: center;
+            margin-bottom: 2rem;
+        }
+
+        .section-header h1 {
+            color: white;
+            font-size: 2.5rem;
+            margin-bottom: 0.5rem;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
+        }
+
+        .section-description {
+            color: rgba(255, 255, 255, 0.9);
+            font-size: 1.1rem;
+        }
+
+        .management-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
+            gap: 2rem;
+        }
+
+        .info-card,
+        .edit-card,
+        .achievements-card {
+            background: white;
+            border-radius: 20px;
+            padding: 2rem;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.2);
+            border: 2px solid #ffc107;
+        }
+
+        .card-header {
+            margin-bottom: 1.5rem;
+            padding-bottom: 1rem;
+            border-bottom: 2px solid #f0f0f0;
+        }
+
+        .card-header h2 {
+            color: #f57c00;
+            font-size: 1.5rem;
+            margin: 0;
+        }
+
+        .avatar-section {
+            text-align: center;
+            margin-bottom: 2rem;
+        }
+
+        .current-avatar {
+            font-size: 5rem;
+            margin-bottom: 1rem;
+        }
+
+        .avatar-section h3 {
+            font-size: 1.5rem;
+            color: #333;
+            margin: 0;
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 1rem;
+        }
+
+        .stat-card {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            padding: 1rem;
+            background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+            border-radius: 10px;
+        }
+
+        .stat-icon {
+            font-size: 2rem;
+        }
+
+        .stat-info {
+            flex: 1;
+        }
+
+        .stat-label {
+            font-size: 0.85rem;
+            color: #666;
+            margin: 0 0 0.3rem 0;
+        }
+
+        .stat-value {
+            font-size: 1.2rem;
+            color: #333;
+            font-weight: 600;
+            margin: 0;
+        }
+
+        .btn-secondary {
+            background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+            color: white;
+        }
+
+        .btn-secondary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(79, 172, 254, 0.4);
+        }
+
+        .btn-danger {
+            background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+            color: white;
+        }
+
+        .btn-danger:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(245, 87, 108, 0.4);
+        }
+
+        .action-buttons {
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
+        }
+
+        /* 排行榜样式 */
+        .ranking {
+            min-height: calc(100vh - 100px);
+            padding: 2rem;
+        }
+
+        .ranking-container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .ranking-content {
+            display: flex;
+            flex-direction: column;
+            gap: 2rem;
+        }
+
+        .player-rank-card {
+            background: linear-gradient(135deg, #ffc107 0%, #ffb300 100%);
+            border-radius: 20px;
+            padding: 2rem;
+            box-shadow: 0 10px 40px rgba(255, 193, 7, 0.3);
+            color: #333;
+        }
+
+        .rank-header h2 {
+            font-size: 1.5rem;
+            margin: 0 0 1.5rem 0;
+        }
+
+        .rank-info {
+            display: flex;
+            align-items: center;
+            gap: 2rem;
+        }
+
+        .rank-number {
+            font-size: 4rem;
+            font-weight: bold;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
+        }
+
+        .player-avatar {
+            font-size: 4rem;
+            filter: drop-shadow(0 4px 8px rgba(0, 0, 0, 0.3));
+        }
+
+        .player-details h3 {
+            font-size: 1.8rem;
+            margin: 0 0 0.5rem 0;
+        }
+
+        .player-stats {
+            display: flex;
+            gap: 1.5rem;
+            font-size: 1.1rem;
+        }
+
+        .ranking-list {
+            background: white;
+            border-radius: 20px;
+            padding: 2rem;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.2);
+            border: 2px solid #ffc107;
+        }
+
+        .list-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1.5rem;
+            padding-bottom: 1rem;
+            border-bottom: 2px solid #f0f0f0;
+        }
+
+        .list-header h2 {
+            color: #f57c00;
+            font-size: 1.5rem;
+            margin: 0;
+        }
+
+        .sort-buttons {
+            display: flex;
+            gap: 0.5rem;
+        }
+
+        .sort-btn {
+            padding: 0.5rem 1rem;
+            border: 2px solid #e0e0e0;
+            background: white;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-weight: 500;
+        }
+
+        .sort-btn:hover {
+            border-color: #ffc107;
+            color: #ffc107;
+        }
+
+        .sort-btn.active {
+            background: #ffc107;
+            color: #333;
+            border-color: #ffc107;
+        }
+
+        .ranking-items {
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+        }
+
+        .ranking-item {
+            display: flex;
+            align-items: center;
+            gap: 1.5rem;
+            padding: 1.5rem;
+            background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+            border-radius: 15px;
+            border-left: 4px solid #999;
+            transition: all 0.3s ease;
+        }
+
+        .ranking-item:hover {
+            transform: translateX(5px);
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+        }
+
+        .ranking-item.rank-1 {
+            background: linear-gradient(135deg, #ffd700 0%, #ffed4e 100%);
+            border-left-color: #ff8c00;
+        }
+
+        .ranking-item.rank-2 {
+            background: linear-gradient(135deg, #c0c0c0 0%, #e8e8e8 100%);
+            border-left-color: #808080;
+        }
+
+        .ranking-item.rank-3 {
+            background: linear-gradient(135deg, #cd7f32 0%, #daa520 100%);
+            border-left-color: #8b4513;
+        }
+
+        .rank-position {
+            width: 60px;
+            text-align: center;
+            flex-shrink: 0;
+        }
+
+        .rank-medal {
+            font-size: 2.5rem;
+        }
+
+        .rank-number {
+            font-size: 1.5rem;
+            font-weight: bold;
+            color: #f57c00;
+        }
+
+        .player-info {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            flex: 1;
+        }
+
+        .player-avatar {
+            font-size: 3rem;
+        }
+
+        .player-details h4 {
+            font-size: 1.2rem;
+            color: #333;
+            margin: 0 0 0.5rem 0;
+        }
+
+        .player-stats {
+            display: flex;
+            gap: 1rem;
+            font-size: 0.9rem;
+            color: #666;
+        }
+
+        .rank-badge {
+            flex-shrink: 0;
+        }
+
+        .badge {
+            padding: 0.5rem 1rem;
+            border-radius: 20px;
+            font-size: 0.85rem;
+            font-weight: 600;
+        }
+
+        .badge.legendary {
+            background: linear-gradient(135deg, #ff6b6b 0%, #ee5a6f 100%);
+            color: white;
+        }
+
+        .badge.epic {
+            background: linear-gradient(135deg, #a29bfe 0%, #6c5ce7 100%);
+            color: white;
+        }
+
+        .badge.rare {
+            background: linear-gradient(135deg, #74b9ff 0%, #0984e3 100%);
+            color: white;
+        }
+
+        .badge.common {
+            background: linear-gradient(135deg, #b2bec3 0%, #636e72 100%);
+            color: white;
+        }
+
+        .stats-section {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 1.5rem;
+        }
+
+        .stat-card {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            padding: 1.5rem;
+            background: white;
+            border-radius: 15px;
+            box-shadow: 0 5px 20px rgba(0, 0, 0, 0.15);
+            border: 2px solid #ffc107;
+        }
+
+        .stat-icon {
+            font-size: 2.5rem;
+        }
+
+        .stat-info {
+            flex: 1;
+        }
+
+        .stat-value {
+            font-size: 1.8rem;
+            font-weight: bold;
+            color: #f57c00;
+            margin: 0 0 0.3rem 0;
+        }
+
+        .stat-label {
+            font-size: 0.9rem;
+            color: #666;
+            margin: 0;
+        }
+
+        /* 成就系统样式 */
+        .achievements-list {
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+        }
+
+        .achievement-item {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            padding: 1rem;
+            background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+            border-radius: 10px;
+            border-left: 4px solid #999;
+            transition: all 0.3s ease;
+        }
+
+        .achievement-item.unlocked {
+            border-left-color: #43e97b;
+            background: linear-gradient(135deg, #e8f8f0 0%, #d4f4e5 100%);
+        }
+
+        .achievement-item:hover {
+            transform: translateX(5px);
+        }
+
+        .achievement-icon {
+            font-size: 2.5rem;
+            flex-shrink: 0;
+        }
+
+        .achievement-info {
+            flex: 1;
+        }
+
+        .achievement-info h4 {
+            font-size: 1rem;
+            color: #333;
+            margin: 0 0 0.3rem 0;
+        }
+
+        .achievement-info p {
+            font-size: 0.85rem;
+            color: #666;
+            margin: 0;
+        }
+
+        .achievement-status {
+            font-size: 1.5rem;
+            flex-shrink: 0;
+        }
+
+        /* 响应式设计 */
+        @media (max-width: 1400px) {
+            .game-layout {
+                grid-template-columns: 250px 1fr 250px;
+            }
+        }
+
+        @media (max-width: 1200px) {
+            .game-layout {
+                grid-template-columns: 1fr;
+                grid-template-rows: auto auto auto;
+            }
+            
+            .left-panel,
+            .right-panel {
+                flex-direction: row;
+                overflow-x: auto;
+            }
+
+            .management-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .areas-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .area-card {
+                flex-direction: column;
+                text-align: center;
+            }
+
+            .map-background {
+                height: 400px;
+            }
+            
+            .map-legend {
+                position: static;
+                margin-top: 1rem;
+            }
+            
+            .movement-hint {
+                position: static;
+                margin-top: 1rem;
+            }
+
+            .rank-info {
+                flex-direction: column;
+                text-align: center;
+            }
+
+            .list-header {
+                flex-direction: column;
+                gap: 1rem;
+                align-items: flex-start;
+            }
+
+            .ranking-item {
+                flex-direction: column;
+                align-items: flex-start;
+            }
+
+            .player-info {
+                width: 100%;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div id="app"></div>
+
+    <script>
+        try {
+            const { createApp, ref, computed, onMounted, watch } = Vue;
+            const { createRouter, createWebHistory } = VueRouter;
+            const { createPinia, defineStore } = Pinia;
+
+        // 认证状态管理
+        const useAuthStore = defineStore('auth', () => {
+            const currentUser = ref(null);
+            const users = ref(loadUsersFromStorage());
+            const userGameData = ref(loadUserGameDataFromStorage());
+
+            const isLoggedIn = computed(() => !!currentUser.value);
+            const currentUserData = computed(() => {
+                if (!currentUser.value) return null;
+                return userGameData.value[currentUser.value.username] || null;
+            });
+
+            function loadUsersFromStorage() {
+                try {
+                    const data = localStorage.getItem('treasure-hunt-users');
+                    if (data) {
+                        return JSON.parse(data);
+                    } else {
+                        const demoUsers = {
+                            'demo1': {
+                                username: 'demo1',
+                                password: '123456',
+                                avatar: '🧙',
+                                createdAt: new Date().toISOString()
+                            },
+                            'demo2': {
+                                username: 'demo2',
+                                password: '123456',
+                                avatar: '🦸',
+                                createdAt: new Date().toISOString()
+                            }
+                        };
+                        localStorage.setItem('treasure-hunt-users', JSON.stringify(demoUsers));
+                        return demoUsers;
+                    }
+                } catch (error) {
+                    console.error('加载用户数据失败:', error);
+                    return {};
+                }
+            }
+
+            function loadUserGameDataFromStorage() {
+                try {
+                    const data = localStorage.getItem('treasure-hunt-user-game-data');
+                    if (data) {
+                        return JSON.parse(data);
+                    } else {
+                        const demoGameData = {
+                            'demo1': {
+                                player: {
+                                    id: 1,
+                                    name: 'demo1',
+                                    level: 8,
+                                    exp: 150,
+                                    coins: 5000,
+                                    gems: 120,
+                                    avatar: '🧙',
+                                    health: 100,
+                                    maxHealth: 100
+                                },
+                                mapData: [
+                                    { id: 1, x: 50, y: 50, type: 'treasure', status: 'opened', level: 1 },
+                                    { id: 2, x: 150, y: 100, type: 'treasure', status: 'opened', level: 2 },
+                                    { id: 3, x: 250, y: 150, type: 'treasure', status: 'locked', level: 3 }
+                                ],
+                                tasks: [
+                                    { id: 1, title: '开启第一个宝箱', description: '在地图上找到并开启第一个宝箱', reward: { coins: 100, exp: 50 }, completed: true },
+                                    { id: 2, title: '收集金币', description: '收集500金币', reward: { coins: 200, exp: 100 }, completed: true, progress: 500, target: 500 }
+                                ],
+                                shopItems: [
+                                    { id: 1, name: '生命药水', price: 50, type: 'potion', effect: '恢复50生命值' },
+                                    { id: 2, name: '经验加成', price: 100, type: 'boost', effect: '经验获取+50%' }
+                                ],
+                                inventory: [],
+                                rankings: []
+                            }
+                        };
+                        localStorage.setItem('treasure-hunt-user-game-data', JSON.stringify(demoGameData));
+                        return demoGameData;
+                    }
+                } catch (error) {
+                    console.error('加载用户游戏数据失败:', error);
+                    return {};
+                }
+            }
+
+            async function register(username, password, avatar) {
+                if (users.value[username]) {
+                    return false;
+                }
+
+                users.value[username] = {
+                    username,
+                    password,
+                    avatar,
+                    createdAt: new Date().toISOString()
+                };
+
+                userGameData.value[username] = {
+                    player: {
+                        id: Date.now(),
+                        name: username,
+                        level: 1,
+                        exp: 0,
+                        coins: 1000,
+                        gems: 50,
+                        avatar: avatar,
+                        health: 100,
+                        maxHealth: 100
+                    },
+                    mapData: [
+                        { id: 1, x: 50, y: 50, type: 'treasure', status: 'locked', level: 1 },
+                        { id: 2, x: 150, y: 100, type: 'treasure', status: 'locked', level: 2 }
+                    ],
+                    tasks: [
+                        { id: 1, title: '开启第一个宝箱', description: '在地图上找到并开启第一个宝箱', reward: { coins: 100, exp: 50 }, completed: false }
+                    ],
+                    shopItems: [
+                        { id: 1, name: '生命药水', price: 50, type: 'potion', effect: '恢复50生命值' },
+                        { id: 2, name: '经验加成', price: 100, type: 'boost', effect: '经验获取+50%' }
+                    ],
+                    inventory: [],
+                    rankings: []
+                };
+
+                localStorage.setItem('treasure-hunt-users', JSON.stringify(users.value));
+                localStorage.setItem('treasure-hunt-user-game-data', JSON.stringify(userGameData.value));
+
+                return true;
+            }
+
+            async function login(username, password) {
+                const user = users.value[username];
+                if (user && user.password === password) {
+                    currentUser.value = user;
+                    localStorage.setItem('treasure-hunt-current-user', JSON.stringify(user));
+                    return true;
+                }
+                return false;
+            }
+
+            function logout() {
+                currentUser.value = null;
+                localStorage.removeItem('treasure-hunt-current-user');
+            }
+
+            function checkLoggedInUser() {
+                try {
+                    const userData = localStorage.getItem('treasure-hunt-current-user');
+                    if (userData) {
+                        currentUser.value = JSON.parse(userData);
+                    }
+                } catch (error) {
+                    console.error('检查登录状态失败:', error);
+                }
+            }
+
+            function updateUserGameData(gameData) {
+                if (currentUser.value) {
+                    userGameData.value[currentUser.value.username] = gameData;
+                    localStorage.setItem('treasure-hunt-user-game-data', JSON.stringify(userGameData.value));
+                }
+            }
+
+            return {
+                currentUser,
+                users,
+                userGameData,
+                isLoggedIn,
+                currentUserData,
+                register,
+                login,
+                logout,
+                checkLoggedInUser,
+                updateUserGameData
+            };
+        });
+
+        // 游戏状态管理
+        const useGameStore = defineStore('game', () => {
+            const authStore = useAuthStore();
+            
+            const getCurrentUserData = () => {
+                if (!authStore.isLoggedIn || !authStore.currentUserData) {
+                    return null;
+                }
+                return authStore.currentUserData;
+            };
+
+            const player = computed(() => {
+                const userData = getCurrentUserData();
+                return userData ? userData.player : null;
+            });
+
+            const mapData = computed(() => {
+                const userData = getCurrentUserData();
+                return userData ? userData.mapData : [];
+            });
+
+            const tasks = computed(() => {
+                const userData = getCurrentUserData();
+                return userData ? userData.tasks : [];
+            });
+
+            const shopItems = computed(() => {
+                const userData = getCurrentUserData();
+                return userData ? userData.shopItems : [];
+            });
+
+            const inventory = computed(() => {
+                const userData = getCurrentUserData();
+                return userData ? userData.inventory : [];
+            });
+
+            function saveCurrentUserData() {
+                const userData = getCurrentUserData();
+                if (userData && authStore.isLoggedIn) {
+                    authStore.updateUserGameData(userData);
+                }
+            }
+
+            function openTreasure(treasureId) {
+                const userData = getCurrentUserData();
+                if (!userData) return null;
+                
+                const treasure = userData.mapData.find(t => t.id === treasureId);
+                if (treasure && treasure.status === 'locked') {
+                    treasure.status = 'opened';
+                    const reward = {
+                        coins: treasure.level * 100,
+                        exp: treasure.level * 50,
+                        gems: treasure.level * 5
+                    };
+                    userData.player.coins += reward.coins;
+                    userData.player.exp += reward.exp;
+                    userData.player.gems += reward.gems;
+                    
+                    checkLevelUp();
+                    updateTaskProgress(1, 1);
+                    saveCurrentUserData();
+                    
+                    return reward;
+                }
+                return null;
+            }
+
+            function checkLevelUp() {
+                const userData = getCurrentUserData();
+                if (!userData) return;
+                
+                const expNeeded = userData.player.level * 100;
+                if (userData.player.exp >= expNeeded) {
+                    userData.player.level++;
+                    userData.player.exp -= expNeeded;
+                    userData.player.maxHealth += 20;
+                    userData.player.health = userData.player.maxHealth;
+                    
+                    updateTaskProgress(3, userData.player.level);
+                    saveCurrentUserData();
+                    
+                    checkLevelUp();
+                }
+            }
+
+            function buyItem(itemId) {
+                const userData = getCurrentUserData();
+                if (!userData) return false;
+                
+                const item = userData.shopItems.find(i => i.id === itemId);
+                if (item && userData.player.coins >= item.price) {
+                    userData.player.coins -= item.price;
+                    userData.inventory.push({ ...item, purchaseDate: new Date() });
+                    
+                    updateTaskProgress(2, userData.player.coins);
+                    saveCurrentUserData();
+                    return true;
+                }
+                return false;
+            }
+
+            function updateTaskProgress(taskId, progress) {
+                const userData = getCurrentUserData();
+                if (!userData) return;
+                
+                const task = userData.tasks.find(t => t.id === taskId);
+                if (task && !task.completed) {
+                    task.progress = progress;
+                    if (task.progress >= task.target) {
+                        completeTask(taskId);
+                    }
+                    saveCurrentUserData();
+                }
+            }
+
+            function completeTask(taskId) {
+                const userData = getCurrentUserData();
+                if (!userData) return;
+                
+                const task = userData.tasks.find(t => t.id === taskId);
+                if (task && !task.completed) {
+                    task.completed = true;
+                    userData.player.coins += task.reward.coins || 0;
+                    userData.player.exp += task.reward.exp || 0;
+                    userData.player.gems += task.reward.gems || 0;
+                    checkLevelUp();
+                    saveCurrentUserData();
+                }
+            }
+
+            function updatePlayerName(name) {
+                const userData = getCurrentUserData();
+                if (userData) {
+                    userData.player.name = name;
+                    saveCurrentUserData();
+                }
+            }
+
+            function updatePlayerAvatar(avatar) {
+                const userData = getCurrentUserData();
+                if (userData) {
+                    userData.player.avatar = avatar;
+                    saveCurrentUserData();
+                }
+            }
+
+            return {
+                player,
+                mapData,
+                tasks,
+                shopItems,
+                inventory,
+                openTreasure,
+                buyItem,
+                completeTask,
+                updateTaskProgress,
+                updatePlayerName,
+                updatePlayerAvatar,
+                getCurrentUserData,
+                saveCurrentUserData
+            };
+        });
+
+        // 主应用组件
+        const App = {
+            setup() {
+                const authStore = useAuthStore();
+
+                onMounted(() => {
+                    authStore.checkLoggedInUser();
+                });
+
+                function handleLogout() {
+                    if (confirm('确定要登出吗？')) {
+                        authStore.logout();
+                    }
+                }
+
+                return {
+                    authStore,
+                    handleLogout
+                };
+            },
+            template: `
+                <div class="app-container">
+                    <nav class="navbar">
+                        <div class="nav-brand">
+                            <span class="logo">🗺️</span>
+                            <span class="brand-name">寻宝游戏</span>
+                        </div>
+                        <div class="nav-links">
+                            <template v-if="authStore.isLoggedIn">
+                                <router-link to="/" class="nav-link">游戏</router-link>
+                                <router-link to="/user" class="nav-link">用户中心</router-link>
+                                <router-link to="/ranking" class="nav-link">排行榜</router-link>
+                                <div class="user-info">
+                                    <span class="user-name">{{ authStore.currentUser?.username }}</span>
+                                    <button @click="handleLogout" class="logout-btn">登出</button>
+                                </div>
+                            </template>
+                            <template v-else>
+                                <router-link to="/auth" class="nav-link">登录/注册</router-link>
+                            </template>
+                        </div>
+                    </nav>
+                    <main class="main-content">
+                        <router-view />
+                    </main>
+                </div>
+            `
+        };
+
+        // 认证页面组件
+        const Auth = {
+            setup() {
+                const activeTab = ref('login');
+
+                return {
+                    activeTab
+                };
+            },
+            template: `
+                <div class="auth-page">
+                    <div class="auth-container">
+                        <div class="auth-tabs">
+                            <button 
+                                @click="activeTab = 'login'"
+                                :class="{ active: activeTab === 'login' }"
+                                class="tab-btn"
+                            >
+                                登录
+                            </button>
+                            <button 
+                                @click="activeTab = 'register'"
+                                :class="{ active: activeTab === 'register' }"
+                                class="tab-btn"
+                            >
+                                注册
+                            </button>
+                        </div>
+                        
+                        <div class="auth-content">
+                            <LoginForm v-if="activeTab === 'login'" @switch-to-register="activeTab = 'register'" />
+                            <RegisterForm v-else @switch-to-login="activeTab = 'login'" />
+                        </div>
+                    </div>
+                </div>
+            `
+        };
+
+        // 登录表单组件
+        const LoginForm = {
+            emits: ['switch-to-register'],
+            setup(props, { emit }) {
+                const authStore = useAuthStore();
+                const isLoading = ref(false);
+
+                const loginForm = ref({
+                    username: '',
+                    password: ''
+                });
+
+                async function handleLogin() {
+                    isLoading.value = true;
+                    try {
+                        const success = await authStore.login(loginForm.value.username, loginForm.value.password);
+                        if (success) {
+                            window.location.href = '/';
+                        } else {
+                            alert('用户名或密码错误！');
+                        }
+                    } catch (error) {
+                        alert('登录失败，请重试！');
+                    } finally {
+                        isLoading.value = false;
+                    }
+                }
+
+                return {
+                    authStore,
+                    isLoading,
+                    loginForm,
+                    handleLogin
+                };
+            },
+            template: `
+                <div class="form-container">
+                    <div class="form-header">
+                        <h2>🎮 登录游戏</h2>
+                        <p>欢迎回到寻宝世界！</p>
+                    </div>
+                    
+                    <form @submit.prevent="handleLogin" class="form">
+                        <div class="form-group">
+                            <label for="username">用户名</label>
+                            <input
+                                id="username"
+                                v-model="loginForm.username"
+                                type="text"
+                                placeholder="请输入用户名"
+                                class="form-input"
+                                required
+                            />
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="password">密码</label>
+                            <input
+                                id="password"
+                                v-model="loginForm.password"
+                                type="password"
+                                placeholder="请输入密码"
+                                class="form-input"
+                                required
+                            />
+                        </div>
+                        
+                        <button type="submit" class="btn btn-primary" :disabled="isLoading">
+                            {{ isLoading ? '登录中...' : '登录' }}
+                        </button>
+                        
+                        <div class="form-footer">
+                            <p>还没有账号？<a href="#" @click="$emit('switch-to-register')">立即注册</a></p>
+                        </div>
+                    </form>
+                </div>
+            `
+        };
+
+        // 注册表单组件
+        const RegisterForm = {
+            emits: ['switch-to-login'],
+            setup(props, { emit }) {
+                const authStore = useAuthStore();
+                const isLoading = ref(false);
+
+                const registerForm = ref({
+                    username: '',
+                    password: '',
+                    confirmPassword: '',
+                    avatar: '👤'
+                });
+
+                const avatars = ['👤', '🧙', '🦸', '🧝', '🦹', '🧚', '👨‍🚀', '👩‍🔬'];
+
+                const isFormValid = computed(() => {
+                    return registerForm.value.username.length >= 3 &&
+                           registerForm.value.password.length >= 6 &&
+                           registerForm.value.password === registerForm.value.confirmPassword;
+                });
+
+                async function handleRegister() {
+                    if (!isFormValid.value) {
+                        alert('请检查输入信息！');
+                        return;
+                    }
+                    
+                    isLoading.value = true;
+                    try {
+                        const success = await authStore.register(
+                            registerForm.value.username,
+                            registerForm.value.password,
+                            registerForm.value.avatar
+                        );
+                        if (success) {
+                            alert('注册成功！正在为您登录...');
+                            await authStore.login(registerForm.value.username, registerForm.value.password);
+                            window.location.href = '/';
+                        } else {
+                            alert('用户名已存在，请选择其他用户名！');
+                        }
+                    } catch (error) {
+                        alert('注册失败，请重试！');
+                    } finally {
+                        isLoading.value = false;
+                    }
+                }
+
+                return {
+                    authStore,
+                    isLoading,
+                    registerForm,
+                    avatars,
+                    isFormValid,
+                    handleRegister
+                };
+            },
+            template: `
+                <div class="form-container">
+                    <div class="form-header">
+                        <h2>🎯 注册账号</h2>
+                        <p>开始您的寻宝冒险之旅！</p>
+                    </div>
+                    
+                    <form @submit.prevent="handleRegister" class="form">
+                        <div class="form-group">
+                            <label for="username">用户名</label>
+                            <input
+                                id="username"
+                                v-model="registerForm.username"
+                                type="text"
+                                placeholder="请输入用户名"
+                                class="form-input"
+                                required
+                                minlength="3"
+                                maxlength="20"
+                            />
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="password">密码</label>
+                            <input
+                                id="password"
+                                v-model="registerForm.password"
+                                type="password"
+                                placeholder="请输入密码"
+                                class="form-input"
+                                required
+                                minlength="6"
+                            />
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="confirmPassword">确认密码</label>
+                            <input
+                                id="confirmPassword"
+                                v-model="registerForm.confirmPassword"
+                                type="password"
+                                placeholder="请再次输入密码"
+                                class="form-input"
+                                required
+                            />
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="avatar">选择头像</label>
+                            <div class="avatar-grid">
+                                <div
+                                    v-for="avatar in avatars"
+                                    :key="avatar"
+                                    class="avatar-option"
+                                    :class="{ active: registerForm.avatar === avatar }"
+                                    @click="registerForm.avatar = avatar"
+                                >
+                                    {{ avatar }}
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <button type="submit" class="btn btn-primary" :disabled="isLoading || !isFormValid">
+                            {{ isLoading ? '注册中...' : '注册' }}
+                        </button>
+                        
+                        <div class="form-footer">
+                            <p>已有账号？<a href="#" @click="$emit('switch-to-login')">立即登录</a></p>
+                        </div>
+                    </form>
+                </div>
+            `
+        };
+
+        // 用户中心组件
+        const UserManagement = {
+            setup() {
+                const authStore = useAuthStore();
+                const gameStore = useGameStore();
+                const player = gameStore.player;
+
+                const editForm = ref({
+                    name: '',
+                    avatar: ''
+                });
+
+                const achievements = ref([
+                    {
+                        id: 1,
+                        name: '新手冒险者',
+                        description: '完成第一个任务',
+                        icon: '🎯',
+                        unlocked: false
+                    },
+                    {
+                        id: 2,
+                        name: '宝藏猎人',
+                        description: '开启10个宝箱',
+                        icon: '💎',
+                        unlocked: false
+                    },
+                    {
+                        id: 3,
+                        name: '金币收集家',
+                        description: '拥有10000金币',
+                        icon: '💰',
+                        unlocked: false
+                    },
+                    {
+                        id: 4,
+                        name: '等级大师',
+                        description: '达到20级',
+                        icon: '⭐',
+                        unlocked: false
+                    }
+                ]);
+
+                function updatePlayerInfo() {
+                    if (editForm.value.name) {
+                        gameStore.updatePlayerName(editForm.value.name);
+                    }
+                    if (editForm.value.avatar) {
+                        gameStore.updatePlayerAvatar(editForm.value.avatar);
+                    }
+                    editForm.value = { name: '', avatar: '' };
+                    alert('信息更新成功！');
+                }
+
+                function resetGameData() {
+                    if (confirm('确定要重置游戏数据吗？此操作不可恢复！')) {
+                        // 重置逻辑
+                        alert('游戏数据已重置！');
+                    }
+                }
+
+                function exportGameData() {
+                    const userData = gameStore.getCurrentUserData();
+                    if (userData) {
+                        const dataStr = JSON.stringify(userData, null, 2);
+                        const dataBlob = new Blob([dataStr], { type: 'application/json' });
+                        const url = URL.createObjectURL(dataBlob);
+                        const link = document.createElement('a');
+                        link.href = url;
+                        link.download = `treasure-hunt-data-${player.value?.name || 'user'}.json`;
+                        link.click();
+                        URL.revokeObjectURL(url);
+                    }
+                }
+
+                function checkAchievements() {
+                    if (!player.value) return;
+                    
+                    achievements.value[0].unlocked = player.value.level >= 2;
+                    achievements.value[1].unlocked = player.value.coins >= 10000;
+                    achievements.value[2].unlocked = player.value.level >= 20;
+                    achievements.value[3].unlocked = player.value.gems >= 100;
+                }
+
+                onMounted(() => {
+                    checkAchievements();
+                });
+
+                watch(() => player.value, () => {
+                    checkAchievements();
+                });
+
+                return {
+                    player,
+                    editForm,
+                    achievements,
+                    updatePlayerInfo,
+                    resetGameData,
+                    exportGameData
+                };
+            },
+            template: `
+                <div class="user-management">
+                    <div class="management-container">
+                        <div class="section-header">
+                            <h1>👤 用户管理中心</h1>
+                            <p class="section-description">管理您的角色信息和游戏数据</p>
+                        </div>
+                        
+                        <div class="management-grid">
+                            <div class="info-card">
+                                <div class="card-header">
+                                    <h2>角色信息</h2>
+                                </div>
+                                
+                                <div class="avatar-section">
+                                    <div class="current-avatar">{{ player?.avatar || '👤' }}</div>
+                                    <h3>{{ player?.name || '冒险者' }}</h3>
+                                </div>
+                                
+                                <div class="stats-grid">
+                                    <div class="stat-card">
+                                        <div class="stat-icon">⭐</div>
+                                        <div class="stat-info">
+                                            <p class="stat-label">等级</p>
+                                            <p class="stat-value">{{ player?.level || 1 }}</p>
+                                        </div>
+                                    </div>
+                                    <div class="stat-card">
+                                        <div class="stat-icon">💰</div>
+                                        <div class="stat-info">
+                                            <p class="stat-label">金币</p>
+                                            <p class="stat-value">{{ player?.coins || 0 }}</p>
+                                        </div>
+                                    </div>
+                                    <div class="stat-card">
+                                        <div class="stat-icon">💎</div>
+                                        <div class="stat-info">
+                                            <p class="stat-label">宝石</p>
+                                            <p class="stat-value">{{ player?.gems || 0 }}</p>
+                                        </div>
+                                    </div>
+                                    <div class="stat-card">
+                                        <div class="stat-icon">❤️</div>
+                                        <div class="stat-info">
+                                            <p class="stat-label">生命值</p>
+                                            <p class="stat-value">{{ player?.health || 0 }}/{{ player?.maxHealth || 100 }}</p>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div class="edit-card">
+                                <div class="card-header">
+                                    <h2>编辑信息</h2>
+                                </div>
+                                
+                                <div class="form-group">
+                                    <label>角色名称</label>
+                                    <input
+                                        v-model="editForm.name"
+                                        type="text"
+                                        placeholder="输入新的角色名称"
+                                        class="form-input"
+                                    />
+                                </div>
+                                
+                                <div class="form-group">
+                                    <label>选择头像</label>
+                                    <div class="avatar-grid">
+                                        <div
+                                            v-for="avatar in ['👤', '🧙', '🦸', '🧝', '🦹', '🧚', '👨‍🚀', '👩‍🔬']"
+                                            :key="avatar"
+                                            class="avatar-option"
+                                            :class="{ active: editForm.avatar === avatar }"
+                                            @click="editForm.avatar = avatar"
+                                        >
+                                            {{ avatar }}
+                                        </div>
+                                    </div>
+                                </div>
+                                
+                                <div class="action-buttons">
+                                    <button @click="updatePlayerInfo" class="btn btn-primary">更新信息</button>
+                                    <button @click="exportGameData" class="btn btn-secondary">导出数据</button>
+                                    <button @click="resetGameData" class="btn btn-danger">重置游戏</button>
+                                </div>
+                            </div>
+                            
+                            <div class="achievements-card">
+                                <div class="card-header">
+                                    <h2>成就系统</h2>
+                                </div>
+                                
+                                <div class="achievements-list">
+                                    <div
+                                        v-for="achievement in achievements"
+                                        :key="achievement.id"
+                                        class="achievement-item"
+                                        :class="{ unlocked: achievement.unlocked }"
+                                    >
+                                        <div class="achievement-icon">{{ achievement.icon }}</div>
+                                        <div class="achievement-info">
+                                            <h4>{{ achievement.name }}</h4>
+                                            <p>{{ achievement.description }}</p>
+                                        </div>
+                                        <div class="achievement-status">
+                                            {{ achievement.unlocked ? '✅' : '🔒' }}
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            `
+        };
+
+        // 排行榜组件
+        const Ranking = {
+            setup() {
+                const gameStore = useGameStore();
+                const authStore = useAuthStore();
+                const player = gameStore.player;
+
+                const rankings = ref([
+                    {
+                        id: 1,
+                        name: 'demo1',
+                        level: 8,
+                        coins: 5000,
+                        gems: 120,
+                        avatar: '🧙'
+                    },
+                    {
+                        id: 2,
+                        name: 'demo2',
+                        level: 12,
+                        coins: 15000,
+                        gems: 200,
+                        avatar: '🦸'
+                    },
+                    {
+                        id: 3,
+                        name: 'test',
+                        level: 5,
+                        coins: 2000,
+                        gems: 50,
+                        avatar: '🧝'
+                    }
+                ]);
+
+                const sortBy = ref('level');
+
+                const sortedRankings = computed(() => {
+                    const sorted = [...rankings.value];
+                    switch (sortBy.value) {
+                        case 'coins':
+                            return sorted.sort((a, b) => b.coins - a.coins);
+                        case 'gems':
+                            return sorted.sort((a, b) => b.gems - a.gems);
+                        default:
+                            return sorted.sort((a, b) => {
+                                if (b.level !== a.level) return b.level - a.level;
+                                return b.coins - a.coins;
+                            });
+                    }
+                });
+
+                function getRankBadge(rank) {
+                    if (rank === 1) return '🥇';
+                    if (rank === 2) return '🥈';
+                    if (rank === 3) return '🥉';
+                    return rank;
+                }
+
+                function getRankClass(rank) {
+                    if (rank <= 3) return `rank-${rank}`;
+                    return '';
+                }
+
+                function getBadgeClass(level) {
+                    if (level >= 20) return 'legendary';
+                    if (level >= 15) return 'epic';
+                    if (level >= 10) return 'rare';
+                    return 'common';
+                }
+
+                const currentUserRank = computed(() => {
+                    const sorted = sortedRankings.value;
+                    const userIndex = sorted.findIndex(r => r.name === player.value?.name);
+                    return userIndex === -1 ? sorted.length + 1 : userIndex + 1;
+                });
+
+                const gameStats = computed(() => {
+                    const totalPlayers = rankings.value.length;
+                    const totalCoins = rankings.value.reduce((sum, player) => sum + player.coins, 0);
+                    const totalGems = rankings.value.reduce((sum, player) => sum + player.gems, 0);
+                    const avgLevel = totalPlayers > 0 ? (rankings.value.reduce((sum, player) => sum + player.level, 0) / totalPlayers).toFixed(1) : 0;
+
+                    return {
+                        totalPlayers,
+                        totalCoins,
+                        totalGems,
+                        avgLevel
+                    };
+                });
+
+                return {
+                    rankings: sortedRankings,
+                    player,
+                    currentUserRank,
+                    sortBy,
+                    getRankBadge,
+                    getRankClass,
+                    getBadgeClass,
+                    gameStats
+                };
+            },
+            template: `
+                <div class="ranking">
+                    <div class="ranking-container">
+                        <div class="section-header">
+                            <h1>🏆 排行榜</h1>
+                            <p class="section-description">查看所有玩家的排名和成就</p>
+                        </div>
+                        
+                        <div class="ranking-content">
+                            <div class="player-rank-card">
+                                <div class="rank-header">
+                                    <h2>我的排名</h2>
+                                </div>
+                                <div class="rank-info">
+                                    <div class="rank-number">{{ getRankBadge(currentUserRank) }}</div>
+                                    <div class="player-avatar">{{ player?.avatar || '👤' }}</div>
+                                    <div class="player-details">
+                                        <h3>{{ player?.name || '冒险者' }}</h3>
+                                        <div class="player-stats">
+                                            <span>等级: {{ player?.level || 1 }}</span>
+                                            <span>金币: {{ player?.coins || 0 }}</span>
+                                            <span>宝石: {{ player?.gems || 0 }}</span>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div class="ranking-list">
+                                <div class="list-header">
+                                    <h2>全球排行榜</h2>
+                                    <div class="sort-buttons">
+                                        <button 
+                                            @click="sortBy = 'level'"
+                                            :class="{ active: sortBy === 'level' }"
+                                            class="sort-btn"
+                                        >
+                                            按等级
+                                        </button>
+                                        <button 
+                                            @click="sortBy = 'coins'"
+                                            :class="{ active: sortBy === 'coins' }"
+                                            class="sort-btn"
+                                        >
+                                            按金币
+                                        </button>
+                                        <button 
+                                            @click="sortBy = 'gems'"
+                                            :class="{ active: sortBy === 'gems' }"
+                                            class="sort-btn"
+                                        >
+                                            按宝石
+                                        </button>
+                                    </div>
+                                </div>
+                                
+                                <div class="ranking-items">
+                                    <div
+                                        v-for="(player, index) in rankings"
+                                        :key="player.id"
+                                        class="ranking-item"
+                                        :class="getRankClass(index + 1)"
+                                    >
+                                        <div class="rank-position">
+                                            <div v-if="index < 3" class="rank-medal">{{ getRankBadge(index + 1) }}</div>
+                                            <div v-else class="rank-number">{{ index + 1 }}</div>
+                                        </div>
+                                        
+                                        <div class="player-info">
+                                            <div class="player-avatar">{{ player.avatar }}</div>
+                                            <div class="player-details">
+                                                <h4>{{ player.name }}</h4>
+                                                <div class="player-stats">
+                                                    <span>等级: {{ player.level }}</span>
+                                                    <span>金币: {{ player.coins }}</span>
+                                                    <span>宝石: {{ player.gems }}</span>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        
+                                        <div class="rank-badge">
+                                            <span class="badge" :class="getBadgeClass(player.level)">
+                                                {{ player.level >= 20 ? '传说' : player.level >= 15 ? '史诗' : player.level >= 10 ? '稀有' : '普通' }}
+                                            </span>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div class="stats-section">
+                                <div class="stat-card">
+                                    <div class="stat-icon">👥</div>
+                                    <div class="stat-info">
+                                        <p class="stat-value">{{ gameStats.totalPlayers }}</p>
+                                        <p class="stat-label">总玩家数</p>
+                                    </div>
+                                </div>
+                                <div class="stat-card">
+                                    <div class="stat-icon">💰</div>
+                                    <div class="stat-info">
+                                        <p class="stat-value">{{ gameStats.totalCoins.toLocaleString() }}</p>
+                                        <p class="stat-label">总金币数</p>
+                                    </div>
+                                </div>
+                                <div class="stat-card">
+                                    <div class="stat-icon">💎</div>
+                                    <div class="stat-info">
+                                        <p class="stat-value">{{ gameStats.totalGems.toLocaleString() }}</p>
+                                        <p class="stat-label">总宝石数</p>
+                                    </div>
+                                </div>
+                                <div class="stat-card">
+                                    <div class="stat-icon">⭐</div>
+                                    <div class="stat-info">
+                                        <p class="stat-value">{{ gameStats.avgLevel }}</p>
+                                        <p class="stat-label">平均等级</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            `
+        };
+
+        // 游戏视图组件
+        const GameView = {
+            setup() {
+                const gameStore = useGameStore();
+
+                return {
+                    gameStore
+                };
+            },
+            template: `
+                <div class="game-view">
+                    <div class="game-layout">
+                        <aside class="left-panel">
+                            <PlayerInfo />
+                            <TaskPanel />
+                        </aside>
+
+                        <main class="game-area">
+                            <MapView />
+                        </main>
+
+                        <aside class="right-panel">
+                            <Shop />
+                            <Inventory />
+                        </aside>
+                    </div>
+                </div>
+            `
+        };
+
+        // 玩家信息组件
+        const PlayerInfo = {
+            setup() {
+                const gameStore = useGameStore();
+                const player = gameStore.player;
+
+                const expNeeded = computed(() => (player.value?.level || 1) * 100);
+
+                const expPercentage = computed(() => {
+                    if (!player.value?.exp || !expNeeded.value) return 0;
+                    return (player.value?.exp / expNeeded.value) * 100;
+                });
+
+                const healthPercentage = computed(() => {
+                    if (!player.value?.health || !player.value?.maxHealth) return 0;
+                    return (player.value?.health / player.value?.maxHealth) * 100;
+                });
+
+                return {
+                    player,
+                    expNeeded,
+                    expPercentage,
+                    healthPercentage
+                };
+            },
+            template: `
+                <div class="player-info">
+                    <div class="player-header">
+                        <div class="avatar">{{ player?.avatar || '👤' }}</div>
+                        <div class="player-name">{{ player?.name || '冒险者' }}</div>
+                    </div>
+                    
+                    <div class="player-stats">
+                        <div class="stat-item">
+                            <span class="stat-label">等级</span>
+                            <span class="stat-value">Lv.{{ player?.level || 1 }}</span>
+                        </div>
+                        
+                        <div class="stat-item">
+                            <span class="stat-label">经验</span>
+                            <div class="exp-bar">
+                                <div class="exp-fill" :style="{ width: expPercentage + '%' }"></div>
+                            </div>
+                            <span class="stat-value">{{ player?.exp || 0 }} / {{ expNeeded }}</span>
+                        </div>
+                        
+                        <div class="stat-item">
+                            <span class="stat-label">生命值</span>
+                            <div class="health-bar">
+                                <div class="health-fill" :style="{ width: healthPercentage + '%' }"></div>
+                            </div>
+                            <span class="stat-value">{{ player?.health || 0 }} / {{ player?.maxHealth || 100 }}</span>
+                        </div>
+                        
+                        <div class="stat-item">
+                            <span class="stat-label">💰 金币</span>
+                            <span class="stat-value">{{ player?.coins || 0 }}</span>
+                        </div>
+                        
+                        <div class="stat-item">
+                            <span class="stat-label">💎 宝石</span>
+                            <span class="stat-value">{{ player?.gems || 0 }}</span>
+                        </div>
+                    </div>
+                </div>
+            `
+        };
+
+        // 任务面板组件
+        const TaskPanel = {
+            setup() {
+                const gameStore = useGameStore();
+                const tasks = gameStore.tasks;
+
+                function progressPercentage(task) {
+                    if (task.target === undefined) return 0;
+                    return (task.progress / task.target) * 100;
+                }
+
+                return {
+                    tasks,
+                    progressPercentage
+                };
+            },
+            template: `
+                <div class="task-panel">
+                    <div class="panel-header">
+                        <h3>📋 任务列表</h3>
+                    </div>
+                    <div class="tasks-container">
+                        <div
+                            v-for="task in tasks"
+                            :key="task.id"
+                            class="task-item"
+                            :class="{ completed: task.completed }"
+                        >
+                            <div class="task-icon">
+                                {{ task.completed ? '✅' : '⏳' }}
+                            </div>
+                            <div class="task-content">
+                                <h4 class="task-title">{{ task.title }}</h4>
+                                <p class="task-description">{{ task.description }}</p>
+                                <div v-if="task.progress !== undefined" class="task-progress">
+                                    <div class="progress-bar">
+                                        <div
+                                            class="progress-fill"
+                                            :style="{ width: progressPercentage(task) + '%' }"
+                                        ></div>
+                                    </div>
+                                    <span class="progress-text">{{ task.progress }} / {{ task.target }}</span>
+                                </div>
+                                <div class="task-reward">
+                                    <span v-if="task.reward.coins">💰 {{ task.reward.coins }}</span>
+                                    <span v-if="task.reward.exp">⭐ {{ task.reward.exp }}</span>
+                                    <span v-if="task.reward.gems">💎 {{ task.reward.gems }}</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            `
+        };
+
+        // 商店组件
+        const Shop = {
+            setup() {
+                const gameStore = useGameStore();
+                const shopItems = gameStore.shopItems;
+                const player = gameStore.player;
+
+                function getItemIcon(type) {
+                    const icons = {
+                        potion: '🧪',
+                        boost: '⚡',
+                        equipment: '⚔️'
+                    };
+                    return icons[type] || '📦';
+                }
+
+                function handleBuy(itemId) {
+                    const success = gameStore.buyItem(itemId);
+                    if (success) {
+                        alert('购买成功！物品已添加到背包。');
+                    } else {
+                        alert('金币不足！');
+                    }
+                }
+
+                return {
+                    shopItems,
+                    player,
+                    getItemIcon,
+                    handleBuy
+                };
+            },
+            template: `
+                <div class="shop">
+                    <div class="shop-header">
+                        <h3>🛒 神秘商店</h3>
+                    </div>
+                    <div class="shop-content">
+                        <div
+                            v-for="item in shopItems"
+                            :key="item.id"
+                            class="shop-item"
+                        >
+                            <div class="item-icon">{{ getItemIcon(item.type) }}</div>
+                            <div class="item-info">
+                                <h4 class="item-name">{{ item.name }}</h4>
+                                <p class="item-effect">{{ item.effect }}</p>
+                                <div class="item-footer">
+                                    <span class="item-price">💰 {{ item.price }}</span>
+                                    <button
+                                        class="buy-btn"
+                                        @click="handleBuy(item.id)"
+                                        :disabled="(player?.coins || 0) < item.price"
+                                    >
+                                        购买
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            `
+        };
+
+        // 背包组件
+        const Inventory = {
+            setup() {
+                const gameStore = useGameStore();
+                const inventory = gameStore.inventory;
+
+                function getItemIcon(type) {
+                    const icons = {
+                        potion: '🧪',
+                        boost: '⚡',
+                        equipment: '⚔️'
+                    };
+                    return icons[type] || '📦';
+                }
+
+                function formatDate(date) {
+                    if (!date) return '';
+                    const d = new Date(date);
+                    return d.toLocaleDateString('zh-CN');
+                }
+
+                return {
+                    inventory,
+                    getItemIcon,
+                    formatDate
+                };
+            },
+            template: `
+                <div class="inventory">
+                    <div class="inventory-header">
+                        <h3>🎒 背包</h3>
+                    </div>
+                    <div class="inventory-content">
+                        <div v-if="inventory.length === 0" class="empty-inventory">
+                            <p>背包是空的</p>
+                            <p class="hint">去商店购买物品吧！</p>
+                        </div>
+                        <div
+                            v-for="(item, index) in inventory"
+                            :key="index"
+                            class="inventory-item"
+                        >
+                            <div class="item-icon">{{ getItemIcon(item.type) }}</div>
+                            <div class="item-details">
+                                <h4>{{ item.name }}</h4>
+                                <p class="item-date">{{ formatDate(item.purchaseDate) }}</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            `
+        };
+
+        // 地图视图组件
+        const MapView = {
+            setup() {
+                const selectedArea = ref(null);
+
+                function handleAreaSelected(area) {
+                    selectedArea.value = area;
+                }
+
+                return {
+                    selectedArea,
+                    handleAreaSelected
+                };
+            },
+            template: `
+                <div class="map-view">
+                    <ExplorationAreas @area-selected="handleAreaSelected" />
+                    <DetailedMap :selected-area="selectedArea" />
+                </div>
+            `
+        };
+
+        // 探索区域组件
+        const ExplorationAreas = {
+            emits: ['area-selected'],
+            setup(props, { emit }) {
+                const gameStore = useGameStore();
+                const selectedArea = ref(null);
+
+                const areas = ref([
+                    {
+                        id: 1,
+                        name: '神秘海岛',
+                        description: '充满热带风情的神秘岛屿,隐藏着海盗的宝藏',
+                        icon: '🏝️',
+                        difficulty: 'easy',
+                        difficultyText: '简单',
+                        reward: 15,
+                        locked: false,
+                        unlocked: true
+                    },
+                    {
+                        id: 2,
+                        name: '魔法森林',
+                        description: '古老的魔法森林,精灵和魔法生物的家园',
+                        icon: '🌲',
+                        difficulty: 'medium',
+                        difficultyText: '中等',
+                        reward: 20,
+                        locked: false,
+                        unlocked: true
+                    },
+                    {
+                        id: 3,
+                        name: '沙漠遗迹',
+                        description: '古代文明的遗迹,埋藏着法老的秘密',
+                        icon: '🏜️',
+                        difficulty: 'hard',
+                        difficultyText: '困难',
+                        reward: 25,
+                        locked: true,
+                        unlocked: false
+                    }
+                ]);
+
+                function selectArea(area) {
+                    if (area.locked) {
+                        alert(`需要达到更高等级才能解锁此区域！`);
+                        return;
+                    }
+                    
+                    selectedArea.value = area;
+                    emit('area-selected', area);
+                }
+
+                return {
+                    areas,
+                    selectedArea,
+                    selectArea
+                };
+            },
+            template: `
+                <div class="exploration-areas">
+                    <div class="areas-header">
+                        <h2>选择探索区域</h2>
+                    </div>
+                    
+                    <div class="areas-grid">
+                        <div
+                            v-for="area in areas"
+                            :key="area.id"
+                            class="area-card"
+                            :class="{ 
+                                selected: selectedArea?.id === area.id,
+                                locked: area.locked 
+                            }"
+                            @click="selectArea(area)"
+                        >
+                            <div class="area-icon">{{ area.icon }}</div>
+                            <div class="area-info">
+                                <h3 class="area-name">{{ area.name }}</h3>
+                                <p class="area-description">{{ area.description }}</p>
+                                <div class="area-meta">
+                                    <span class="difficulty" :class="area.difficulty">{{ area.difficultyText }}</span>
+                                    <span class="reward">{{ area.reward }} 宝藏</span>
+                                    <span v-if="area.locked" class="locked-text">未解锁</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            `
+        };
+
+        // 详细地图组件
+        const DetailedMap = {
+            props: {
+                selectedArea: {
+                    type: Object,
+                    default: null
+                }
+            },
+            setup(props) {
+                const gameStore = useGameStore();
+                const player = computed(() => gameStore.player);
+                const playerPosition = ref({ x: 20, y: 60 });
+                const currentMapTreasures = ref([]);
+
+                function movePlayer(event) {
+                    const rect = event.currentTarget.getBoundingClientRect();
+                    const x = ((event.clientX - rect.left) / rect.width) * 100;
+                    const y = ((event.clientY - rect.top) / rect.height) * 100;
+                    
+                    playerPosition.value = { x: Math.max(5, Math.min(95, x)), y: Math.max(5, Math.min(95, y)) };
+                }
+
+                function interactTreasure(treasure) {
+                    const reward = gameStore.openTreasure(treasure.id);
+                    if (reward) {
+                        alert(`🎉 发现宝藏！\n获得：\n💰 ${reward.coins} 金币\n⭐ ${reward.exp} 经验\n💎 ${reward.gems} 宝石`);
+                    } else {
+                        alert('这个宝箱已经被打开了！');
+                    }
+                }
+
+                function generateMapTreasures() {
+                    if (!props.selectedArea) return;
+                    
+                    const treasures = [];
+                    const treasureCount = props.selectedArea.reward || 15;
+                    
+                    for (let i = 0; i < treasureCount; i++) {
+                        treasures.push({
+                            id: i + 1,
+                            name: `宝藏 ${i + 1}`,
+                            x: Math.random() * 80 + 10,
+                            y: Math.random() * 70 + 15,
+                            level: Math.floor(Math.random() * 5) + 1,
+                            status: Math.random() > 0.5 ? 'locked' : 'opened'
+                        });
+                    }
+                    
+                    currentMapTreasures.value = treasures;
+                }
+
+                watch(() => props.selectedArea, () => {
+                    generateMapTreasures();
+                    playerPosition.value = { x: 20, y: 60 };
+                });
+
+                onMounted(() => {
+                    generateMapTreasures();
+                });
+
+                return {
+                    player,
+                    playerPosition,
+                    currentMapTreasures,
+                    movePlayer,
+                    interactTreasure
+                };
+            },
+            template: `
+                <div class="detailed-map">
+                    <div v-if="selectedArea" class="map-header">
+                        <h2>{{ selectedArea.name }}</h2>
+                        <p>{{ selectedArea.description }}</p>
+                    </div>
+                    
+                    <div v-if="selectedArea" class="map-container">
+                        <div 
+                            class="map-background"
+                            :class="'map-' + selectedArea.id"
+                            @click="movePlayer"
+                        >
+                            <div
+                                v-for="treasure in currentMapTreasures"
+                                :key="treasure.id"
+                                class="treasure-point"
+                                :class="{ opened: treasure.status === 'opened' }"
+                                :style="{ 
+                                    left: treasure.x + '%', 
+                                    top: treasure.y + '%' 
+                                }"
+                                @click.stop="interactTreasure(treasure)"
+                            >
+                                <div class="treasure-icon">
+                                    {{ treasure.status === 'opened' ? '📦' : '🗝️' }}
+                                </div>
+                            </div>
+                            
+                            <div
+                                class="player-position"
+                                :style="{ 
+                                    left: playerPosition.x + '%', 
+                                    top: playerPosition.y + '%' 
+                                }"
+                            >
+                                <div class="player-avatar">{{ player?.avatar || '👤' }}</div>
+                            </div>
+                            
+                            <div class="map-legend">
+                                <div class="legend-item">
+                                    <span class="legend-icon">🗝️</span>
+                                    <span>未开启宝箱</span>
+                                </div>
+                                <div class="legend-item">
+                                    <span class="legend-icon">📦</span>
+                                    <span>已开启宝箱</span>
+                                </div>
+                            </div>
+                            
+                            <div class="movement-hint">
+                                <span class="hint-icon">👆</span>
+                                <span>点击地图移动角色，点击宝箱开启</span>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div v-else class="no-area-selected">
+                        <div class="placeholder-content">
+                            <div class="placeholder-icon">🗺️</div>
+                            <h3>选择探索区域</h3>
+                            <p>从上方选择一个区域开始探索</p>
+                        </div>
+                    </div>
+                </div>
+            `
+        };
+
+        // 路由配置
+        const routes = [
+            { path: '/', component: GameView, meta: { requiresAuth: true } },
+            { path: '/user', component: UserManagement, meta: { requiresAuth: true } },
+            { path: '/ranking', component: Ranking, meta: { requiresAuth: true } },
+            { path: '/auth', component: Auth, meta: { requiresAuth: false } }
+        ];
+
+        const router = createRouter({
+            history: createWebHistory(),
+            routes
+        });
+
+        // 路由守卫
+        router.beforeEach((to, from, next) => {
+            const authStore = useAuthStore();
+            if (to.meta.requiresAuth && !authStore.isLoggedIn) {
+                next('/auth');
+            } else if (to.path === '/auth' && authStore.isLoggedIn) {
+                next('/');
+            } else {
+                next();
+            }
+        });
+
+        // 创建应用
+        const app = createApp(App);
+        const pinia = createPinia();
+        
+        app.use(pinia);
+        app.use(router);
+        
+        // 注册组件
+        app.component('GameView', GameView);
+        app.component('Auth', Auth);
+        app.component('UserManagement', UserManagement);
+        app.component('Ranking', Ranking);
+        app.component('LoginForm', LoginForm);
+        app.component('RegisterForm', RegisterForm);
+        app.component('MapView', MapView);
+        app.component('PlayerInfo', PlayerInfo);
+        app.component('TaskPanel', TaskPanel);
+        app.component('Shop', Shop);
+        app.component('Inventory', Inventory);
+        app.component('ExplorationAreas', ExplorationAreas);
+        app.component('DetailedMap', DetailedMap);
+
+        // 挂载应用
+        app.mount('#app');
+        
+        } catch (error) {
+            console.error('应用启动失败:', error);
+            document.body.innerHTML = `
+                <div style="text-align: center; padding: 50px; font-family: Arial, sans-serif;">
+                    <h1>应用加载失败</h1>
+                    <p>错误信息: ${error.message}</p>
+                    <p>请刷新页面重试，或检查网络连接</p>
+                    <button onclick="location.reload()" style="padding: 10px 20px; margin-top: 20px; cursor: pointer;">刷新页面</button>
+                </div>
+            `;
+        }
+    </script>
+</body>
+</html>
